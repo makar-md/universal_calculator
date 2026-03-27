@@ -6,4 +6,4 @@ export default function Index() {
       <Text> all work</Text>
     </View>
   );
-}
+} 
