@@ -21,6 +21,7 @@ export default function Index() {
       const parts = interval.split(';');
       const a = parseFloat(parts[0]);
       const b = parseFloat(parts[1]);
+
       const eps = parseFloat(accuracy);
 
       if (isNaN(a) || isNaN(b) || isNaN(eps)) {
@@ -38,7 +39,7 @@ export default function Index() {
 
       let left = a;
       let right = b;
-      let mid = left;
+      let mid = left; //середина
       let stepCount = 0;
       let stepArray = [];
 
@@ -46,8 +47,9 @@ export default function Index() {
         mid = (left + right)/2;
         const fmid = f(mid);
         stepCount++;
+        let d = left - right;
 
-        stepArray.push(`Шаг ${stepCount}: a=${left.toFixed(6)}, b=${right.toFixed(6)}, mid=${mid.toFixed(6)}, f(mid)=${fmid.toFixed(6)}`);
+        stepArray.push(`Шаг ${stepCount}: a=${left.toFixed(6)}, b=${right.toFixed(6)}, d=${d.toFixed(6)}, mid=${mid.toFixed(6)}, f(a)=${fa.toFixed(6)}, f(b)=${fb.toFixed(6)}, f(mid)=${fmid.toFixed(6)},`);
 
         if (fa * fmid <= 0) {
           right = mid;
@@ -61,6 +63,7 @@ export default function Index() {
           stepArray.push("Превышено 1000 итераций, остановка");
           break;
         }
+        stepArray.push(`[${left.toFixed(6)}; ${right.toFixed(6)}]`);
       }
 
       stepArray.push(`Корень ≈ ${mid.toFixed(6)} после ${stepCount} итераций`);
