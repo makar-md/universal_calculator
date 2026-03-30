@@ -2,6 +2,8 @@ import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
 import { parseExpression } from "../mathFunctions/parseExpression";
+import { iterationMethod } from "../mathFunctions/iterationMethod";
+import { bisectionMethod } from "../mathFunctions/bisectionMethod";
 import "../global.css";
 
 export default function Index() {
@@ -10,107 +12,169 @@ export default function Index() {
   const [accuracy, setAccuracy] = useState('');
 
   const [expr, setExpr] = useState(null);
-  const [steps, setSteps] = useState([]); // массив шагов метода дихотомии
+  const [steps, setSteps] = useState([]);
+  const [result, setResult] = useState(null);
+  const [method, setMethod] = useState(null); 
 
-  const BtnClick = () => {
+  const handleBisection = () => {
+    setMethod("bisection");
+
     try {
       const f = parseExpression(text);
       setExpr(() => f);
 
-      // Разбираем интервал и точность
-      const parts = interval.split(';');
-      const a = parseFloat(parts[0]);
-      const b = parseFloat(parts[1]);
-
+      const [a, b] = interval.split(';').map(Number);
       const eps = parseFloat(accuracy);
 
       if (isNaN(a) || isNaN(b) || isNaN(eps)) {
-        setSteps(["Ошибка: проверьте интервал и точность"]);
+        setSteps([]);
+        setResult(null);
         return;
       }
 
-      let fa = f(a);
-      let fb = f(b);
+      const res = bisectionMethod(f, a, b, eps);
 
-      if (fa * fb > 0) {
-        setSteps(["Ошибка: f(a)*f(b) > 0, метод дихотомии неприменим"]);
-        return;
-      }
-
-      let left = a;
-      let right = b;
-      let mid = left; //середина
-      let stepCount = 0;
-      let stepArray = [];
-
-      while ((right - left)/2 > eps) {
-        mid = (left + right)/2;
-        const fmid = f(mid);
-        stepCount++;
-        let d = left - right;
-
-        stepArray.push(`Шаг ${stepCount}: a=${left.toFixed(6)}, b=${right.toFixed(6)}, d=${d.toFixed(6)}, mid=${mid.toFixed(6)}, f(a)=${fa.toFixed(6)}, f(b)=${fb.toFixed(6)}, f(mid)=${fmid.toFixed(6)},`);
-
-        if (fa * fmid <= 0) {
-          right = mid;
-          fb = fmid;
-        } else {
-          left = mid;
-          fa = fmid;
-        }
-
-        if (stepCount > 1000) {
-          stepArray.push("Превышено 1000 итераций, остановка");
-          break;
-        }
-        stepArray.push(`[${left.toFixed(6)}; ${right.toFixed(6)}]`);
-      }
-
-      stepArray.push(`Корень ≈ ${mid.toFixed(6)} после ${stepCount} итераций`);
-      setSteps(stepArray);
+      setSteps(res.steps);
+      setResult({
+        root: res.root,
+        iterations: res.iterations
+      });
 
     } catch (e) {
       console.log(e.message);
-      setSteps(["Ошибка функции: " + e.message]);
+      setSteps([]);
+      setResult(null);
     }
+  };
 
-    console.log(interval);
-    console.log(accuracy);
+  const handleIteration = () => {
+    setMethod("iteration");
+
+    try {
+      const f = parseExpression(text);
+      setExpr(() => f);
+
+      const [a, b] = interval.split(';').map(Number);
+      const eps = parseFloat(accuracy);
+
+      if (isNaN(a) || isNaN(b) || isNaN(eps)) {
+        setSteps([]);
+        setResult(null);
+        return;
+      }
+
+      const res = iterationMethod(f, a, b, eps);
+
+      setSteps(res.steps);
+      setResult({
+        root: res.root,
+        iterations: res.iterations
+      });
+
+    } catch (e) {
+      console.log(e.message);
+      setSteps([]);
+      setResult(null);
+    }
   };
 
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
-        <View className="flex flex-col mx-auto w-11/12 md:w-1/2 gap-4">
-          <Text className="font-bold text-xl text-zinc-900"> Введите выражение</Text>
-
-          <TextInput value={text} onChangeText={setText} className="border border-zinc-900 px-2 py-1 rounded-xl text-zinc-900 placeholder:text-zinc-400" placeholder="sin(x) + ln(x) + x^2"/>
-        
-          <View className="flex flex-col gap-4">
-            <View className="flex flex-row gap-20">
-              <Text className="font-bold text-xl text-zinc-900 flex-1">Интервал: </Text>
-              <Text className="font-bold text-xl text-zinc-900 flex-1">Точность: </Text> 
-            </View>
-            <View className="flex flex-row gap-20">
-              <TextInput value={interval} onChangeText={setInterval} className="border border-zinc-900 px-2 py-1 rounded-xl text-zinc-900 flex-1 placeholder:text-zinc-400" placeholder="0;3"/>
-              <TextInput value={accuracy} onChangeText={setAccuracy} className="border border-zinc-900 px-2 py-1 rounded-xl text-zinc-900 flex-1 placeholder:text-zinc-400" placeholder="10^-3"/>
-            </View>
-          </View>
-
-          <Pressable onPress={BtnClick} className="px-3 py-1 rounded-xl bg-orange-500 flex w-48 self-center">
-            <Text className="text-zinc-50 text-lg font-bold text-center">Метод дихотомии</Text>
-          </Pressable>
+        <View className="flex flex-col mx-auto w-11/12 gap-4">
 
           <Text className="font-bold text-xl text-zinc-900">
-            {expr ? expr(1) : "Нет функции"}
+            Введите выражение
           </Text>
 
-          {/* Вывод шагов метода дихотомии */}
-          <ScrollView className="mt-4 h-64 border border-zinc-300 rounded-xl p-2">
-            {steps.map((step, index) => (
-              <Text key={index} className="text-zinc-900 mb-1">{step}</Text>
+          <TextInput value={text} onChangeText={setText} placeholder="sin(x) + ln(x) + x^2"
+            className="border border-zinc-900 px-2 py-1 rounded-xl placeholder:text-zinc-500"/>
+
+          <View className="flex flex-row gap-4">
+            <TextInput value={interval} onChangeText={setInterval} placeholder="0;3"
+              className="border border-zinc-900 px-2 py-1 rounded-xl flex-1 placeholder:text-zinc-500" />
+
+            <TextInput value={accuracy} onChangeText={setAccuracy} placeholder="0.001"
+              className="border border-zinc-900 px-2 py-1 rounded-xl flex-1 placeholder:text-zinc-500"/>
+          </View>
+
+          <View className="flex flex-row gap-4 justify-center">
+            <Pressable onPress={handleBisection} className="bg-orange-500 px-3 py-1 rounded-xl">
+              <Text className="text-white font-bold">Дихотомия</Text>
+            </Pressable>
+
+            <Pressable onPress={handleIteration} className="bg-orange-500 px-3 py-1 rounded-xl">
+              <Text className="text-white font-bold">Итерации</Text>
+            </Pressable>
+          </View>
+
+          {/* ТАБЛИЦА */}
+          <ScrollView className="h-96 border rounded-xl">
+
+            <View className="flex flex-row bg-orange-500">
+              {method === "bisection" && (
+                <>
+                  <Text className="flex-1 text-white p-1">k</Text>
+                  <Text className="flex-1 text-white p-1">a</Text>
+                  <Text className="flex-1 text-white p-1">b</Text>
+                  <Text className="flex-1 text-white p-1">d</Text>
+                  <Text className="flex-1 text-white p-1">mid</Text>
+                  <Text className="flex-1 text-white p-1">f(a)</Text>
+                  <Text className="flex-1 text-white p-1">f(b)</Text>
+                  <Text className="flex-1 text-white p-1">f(mid)</Text>
+                </>
+              )}
+
+              {method === "iteration" && (
+                <>
+                  <Text className="flex-1 text-white p-1">k</Text>
+                  <Text className="flex-1 text-white p-1">x</Text>
+                  <Text className="flex-1 text-white p-1">f(x)</Text>
+                  <Text className="flex-1 text-white p-1">x_next</Text>
+                  <Text className="flex-1 text-white p-1">Δ</Text>
+                </>
+              )}
+            </View>
+
+            {steps.map((row, i) => (
+              <View key={i} className="flex flex-row border-b">
+
+                {method === "bisection" && (
+                  <>
+                    <Text className="flex-1 p-1">{row.step}</Text>
+                    <Text className="flex-1 p-1">{row.a.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.b.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.d.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.mid.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.fa.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.fb.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.fmid.toFixed(4)}</Text>
+                  </>
+                )}
+
+                {method === "iteration" && (
+                  <>
+                    <Text className="flex-1 p-1">{row.step}</Text>
+                    <Text className="flex-1 p-1">{row.x.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.fx.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.xNext.toFixed(4)}</Text>
+                    <Text className="flex-1 p-1">{row.diff.toFixed(4)}</Text>
+                  </>
+                )}
+
+              </View>
             ))}
+
           </ScrollView>
+
+          {result && (
+            <View className="p-3 bg-green-100 rounded-xl">
+              <Text className="text-green-800 font-bold">
+                Корень ≈ {result.root.toFixed(4)}
+              </Text>
+              <Text>Итераций: {result.iterations}</Text>
+            </View>
+          )}
 
         </View>
       </SafeAreaView>
