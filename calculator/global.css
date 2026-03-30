@@ -3,3 +3,7 @@
 @import "tailwindcss/utilities.css";
  
 @import "nativewind/theme";
+
+*{
+    font-family: Arial, Helvetica, sans-serif;
+}
