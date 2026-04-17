@@ -2,26 +2,20 @@ import { create, all } from 'mathjs'
 
 const math = create(all)
 
-export function parseExpression(expr) {
-  let compiled
-
-  try {
-    compiled = math.compile(expr)
-  } catch (e) {
-    throw new Error('Неверное выражение')
-  }
+export const parseExpression = (expr) => {
+  const prepared = expr
+    .toLowerCase()
+    .replace(/ln/g, "Math.log")
+    .replace(/sin/g, "Math.sin")
+    .replace(/cos/g, "Math.cos")
+    .replace(/tan/g, "Math.tan")
+    .replace(/\^/g, "**");
 
   return (x) => {
     try {
-      const result = compiled.evaluate({ x })
-
-      if (!isFinite(result)) {
-        throw new Error('Ошибка вычисления')
-      }
-
-      return result
+      return Function("x", `return ${prepared}`)(x);
     } catch (e) {
-      throw new Error('Ошибка вычисления')
+      throw new Error("Ошибка парсинга функции");
     }
-  }
-}
+  };
+};

@@ -10,38 +10,47 @@ export default function Index() {
   const [text, setText] = useState('');
   const [interval, setInterval] = useState('');
   const [accuracy, setAccuracy] = useState('');
-
   const [expr, setExpr] = useState(null);
   const [steps, setSteps] = useState([]);
   const [result, setResult] = useState(null);
-  const [method, setMethod] = useState(null); 
+  const [method, setMethod] = useState(null);
+
+  function getData(){
+    const f = parseExpression(text);
+    setExpr(() => f);
+
+    const [a, b] = interval.split(';').map(Number);
+    const eps = Function(`return ${accuracy.replace("^", "**")}`)();
+    if (isNaN(a) || isNaN(b) || isNaN(eps)) {
+      setSteps([]);
+      setResult(null);
+      alert("Пожалуйста, убедитесь, что все поля введены корректно!");
+      return null;
+    }
+    const data = {
+      f:f,
+      a:a,
+      b:b,
+      eps:eps
+    };
+    return data;
+  }
 
   const handleBisection = () => {
     setMethod("bisection");
 
     try {
-      const f = parseExpression(text);
-      setExpr(() => f);
+      const data = getData()
 
-      const [a, b] = interval.split(';').map(Number);
-      const eps = parseFloat(accuracy);
-
-      if (isNaN(a) || isNaN(b) || isNaN(eps)) {
-        setSteps([]);
-        setResult(null);
-        return;
-      }
-
-      const res = bisectionMethod(f, a, b, eps);
+      const res = bisectionMethod(data.f, data.a, data.b, data.eps);
 
       setSteps(res.steps);
       setResult({
         root: res.root,
         iterations: res.iterations
       });
-
     } catch (e) {
-      console.log(e.message);
+      alert("Ошибка: " + e.message);
       setSteps([]);
       setResult(null);
     }
@@ -51,19 +60,9 @@ export default function Index() {
     setMethod("iteration");
 
     try {
-      const f = parseExpression(text);
-      setExpr(() => f);
+      const data = getData();
 
-      const [a, b] = interval.split(';').map(Number);
-      const eps = parseFloat(accuracy);
-
-      if (isNaN(a) || isNaN(b) || isNaN(eps)) {
-        setSteps([]);
-        setResult(null);
-        return;
-      }
-
-      const res = iterationMethod(f, a, b, eps);
+      const res = iterationMethod(data.f, data.a, data.b, data.eps);
 
       setSteps(res.steps);
       setResult({
@@ -72,7 +71,7 @@ export default function Index() {
       });
 
     } catch (e) {
-      console.log(e.message);
+      alert("Ошибка: " + e.message);
       setSteps([]);
       setResult(null);
     }
@@ -82,35 +81,40 @@ export default function Index() {
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
         <View className="flex flex-col mx-auto w-11/12 gap-4">
-
-          <Text className="font-bold text-xl text-zinc-900">
-            Введите выражение
-          </Text>
-
-          <TextInput value={text} onChangeText={setText} placeholder="sin(x) + ln(x) + x^2"
-            className="border border-zinc-900 px-2 py-1 rounded-xl placeholder:text-zinc-500"/>
+          {/* Ввод данных */}
+          <Text className="font-bold text-xl text-zinc-900">Введите выражение</Text>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholder="sin(x) + ln(x) + x^2"
+            className="border border-zinc-900 px-2 py-1 rounded-xl placeholder:text-zinc-500"
+          />
 
           <View className="flex flex-row gap-4">
-            <TextInput value={interval} onChangeText={setInterval} placeholder="0;3"
-              className="border border-zinc-900 px-2 py-1 rounded-xl flex-1 placeholder:text-zinc-500" />
-
-            <TextInput value={accuracy} onChangeText={setAccuracy} placeholder="0.001"
-              className="border border-zinc-900 px-2 py-1 rounded-xl flex-1 placeholder:text-zinc-500"/>
+            <TextInput
+              value={interval}
+              onChangeText={setInterval}
+              placeholder="0;3"
+              className="border border-zinc-900 px-2 py-1 rounded-xl flex-1 placeholder:text-zinc-500"
+            />
+            <TextInput
+              value={accuracy}
+              onChangeText={setAccuracy}
+              placeholder="0.001"
+              className="border border-zinc-900 px-2 py-1 rounded-xl flex-1 placeholder:text-zinc-500"
+            />
           </View>
 
           <View className="flex flex-row gap-4 justify-center">
             <Pressable onPress={handleBisection} className="bg-orange-500 px-3 py-1 rounded-xl">
               <Text className="text-white font-bold">Дихотомия</Text>
             </Pressable>
-
             <Pressable onPress={handleIteration} className="bg-orange-500 px-3 py-1 rounded-xl">
               <Text className="text-white font-bold">Итерации</Text>
             </Pressable>
           </View>
 
-          {/* ТАБЛИЦА */}
           <ScrollView className="h-96 border rounded-xl">
-
             <View className="flex flex-row bg-orange-500">
               {method === "bisection" && (
                 <>
@@ -124,7 +128,6 @@ export default function Index() {
                   <Text className="flex-1 text-white p-1">f(mid)</Text>
                 </>
               )}
-
               {method === "iteration" && (
                 <>
                   <Text className="flex-1 text-white p-1">k</Text>
@@ -136,9 +139,9 @@ export default function Index() {
               )}
             </View>
 
+            {/* Шаги метода */}
             {steps.map((row, i) => (
               <View key={i} className="flex flex-row border-b">
-
                 {method === "bisection" && (
                   <>
                     <Text className="flex-1 p-1">{row.step}</Text>
@@ -151,7 +154,6 @@ export default function Index() {
                     <Text className="flex-1 p-1">{row.fmid.toFixed(4)}</Text>
                   </>
                 )}
-
                 {method === "iteration" && (
                   <>
                     <Text className="flex-1 p-1">{row.step}</Text>
@@ -161,12 +163,11 @@ export default function Index() {
                     <Text className="flex-1 p-1">{row.diff.toFixed(4)}</Text>
                   </>
                 )}
-
               </View>
             ))}
-
           </ScrollView>
 
+          {/* Результаты */}
           {result && (
             <View className="p-3 bg-green-100 rounded-xl">
               <Text className="text-green-800 font-bold">

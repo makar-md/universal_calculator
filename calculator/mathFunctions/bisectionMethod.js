@@ -5,6 +5,9 @@ export const bisectionMethod = (f, a, b, eps) => {
   if (fa * fb > 0) {
     throw new Error("f(a) * f(b) > 0");
   }
+  if (!isFinite(fa) || !isFinite(fb)) {
+    throw new Error("Функция не определена на интервале");
+  }
 
   let left = a;
   let right = b;
@@ -35,6 +38,9 @@ export const bisectionMethod = (f, a, b, eps) => {
     } else {
       left = mid;
       fa = fmid;
+    }
+    if (!isFinite(fmid)) {
+      throw new Error("Ошибка вычисления внутри метода");
     }
 
     if (stepCount > 1000) break;
