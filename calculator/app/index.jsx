@@ -4,7 +4,9 @@ import { useState } from "react";
 import { parseExpression } from "../mathFunctions/parseExpression";
 import { iterationMethod } from "../mathFunctions/iterationMethod";
 import { bisectionMethod } from "../mathFunctions/bisectionMethod";
+import { Link } from 'expo-router';
 import "../global.css";
+import Integrals from './integrals';
 
 export default function Index() {
   const [text, setText] = useState('');
@@ -81,6 +83,9 @@ export default function Index() {
     <SafeAreaProvider>
       <SafeAreaView className="flex-1">
         <View className="flex flex-col mx-auto w-11/12 gap-4">
+          <View className="border border-teal-500 h-5 w-full cursor-pointer">
+            <Link href="/integrals">Интегрирование</Link>
+          </View>
           {/* Ввод данных */}
           <Text className="font-bold text-xl text-zinc-900">Введите выражение</Text>
           <TextInput
