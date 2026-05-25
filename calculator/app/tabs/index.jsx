@@ -1,10 +1,10 @@
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
-import { parseExpression } from "../mathFunctions/parseExpression";
-import { iterationMethod } from "../mathFunctions/iterationMethod";
-import { bisectionMethod } from "../mathFunctions/bisectionMethod";
-import "../global.css";
+import { iterationMethod } from "./../../mathFunctions/iterationMethod";
+import { bisectionMethod } from "./../../mathFunctions/bisectionMethod";
+import "./../../global.css";
+import { parseExpression } from './../../mathFunctions/parseExpression';
 
 export default function Index() {
   const [text, setText] = useState('');
