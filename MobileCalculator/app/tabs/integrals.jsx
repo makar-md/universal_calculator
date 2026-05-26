@@ -1,12 +1,12 @@
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
-import { parseExpression } from "../mathFunctions/parseExpression";
-import { IntegrationSquare } from "../mathFunctions/IntegrationSquare";
-import { IntegrationTrapeze } from "../mathFunctions/IntegrationTrapeze";
-import { IntegrationSimpson } from "../mathFunctions/IntegrationSimpson";
-import { IntegrationNewtonCotes } from "../mathFunctions/integrationNewtonCotes";
-import "../global.css";
+import { parseExpression } from "../../mathFunctions/parseExpression";
+import { IntegrationSquare } from "../../mathFunctions/IntegrationSquare";
+import { IntegrationTrapeze } from "../../mathFunctions/IntegrationTrapeze";
+import { IntegrationSimpson } from "../../mathFunctions/IntegrationSimpson";
+import { IntegrationNewtonCotes } from "../../mathFunctions/integrationNewtonCotes";
+import "../../global.css";
 
 export default function Integrals() {
   const [func, setFunc] = useState('');
@@ -68,7 +68,7 @@ export default function Integrals() {
             </Text>
 
             <Text className="text-white text-5xl font-bold mt-1">
-              Интегралы
+              integrals
             </Text>
           </View>
 
