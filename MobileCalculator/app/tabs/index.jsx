@@ -81,7 +81,7 @@ export default function Index() {
 
   return (
   <SafeAreaProvider>
-    <SafeAreaView className="flex-1 bg-zinc-900">
+    <SafeAreaView className="flex-1 bg-black">
 
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
 
