@@ -8,8 +8,8 @@ export const IntegrationSquare = (f, a, b, n) => {
         arr.push(f(i));
     }
     let eps = 0;
-    for(let item of arr){
-        eps += item;
+    for(let i = 0; i < y.length; i++){
+        eps += y[i];
     }
 
     let result = h * eps;
