@@ -28,7 +28,8 @@ export const IntegrationNewtonCotes = (f, a, b, n) => {
 };
 
 export const IntegrationNewtonCotesTable = (x, y) => {
-    let h = x[1] - x[0]
+    let h = x[1] - x[0];
+    let n = y.length -1;
 
     let weights, denom
     if(n === 1) { weights = [1, 1]; denom = 2 }
@@ -44,7 +45,7 @@ export const IntegrationNewtonCotesTable = (x, y) => {
         sum += weights[i] * y[i]
     }
     
-    let result = (end - start) * sum / denom
+    let result = (y[y.length -1 ] - y[0]) * sum / denom
     return result
 };
 

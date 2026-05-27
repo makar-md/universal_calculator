@@ -2,10 +2,10 @@ import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Pla
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
 import { parseExpression } from "../../mathFunctions/parseExpression";
-import { IntegrationSquare } from "../../mathFunctions/IntegrationSquare";
-import { IntegrationTrapeze } from "../../mathFunctions/IntegrationTrapeze";
-import { IntegrationSimpson } from "../../mathFunctions/IntegrationSimpson";
-import { IntegrationNewtonCotes } from "../../mathFunctions/integrationNewtonCotes";
+import { IntegrationSquare, IntegrationSquareTable } from "../../mathFunctions/IntegrationSquare";
+import { IntegrationTrapeze, IntegrationTrapezeTable } from "../../mathFunctions/IntegrationTrapeze";
+import { IntegrationSimpson, IntegrationSimpsonTable } from "../../mathFunctions/IntegrationSimpson";
+import { IntegrationNewtonCotes, IntegrationNewtonCotesTable } from "../../mathFunctions/integrationNewtonCotes";
 import "../../global.css";
 
 export default function Integrals() {
@@ -22,6 +22,7 @@ export default function Integrals() {
     { x: "", y: "", id: 2 }
   ]);
   const [xValue, setXValue] = useState("");
+  const [yValue, setYValue] = useState("");
 
   // Добавление новой точки
   const addPoint = () => {
@@ -45,34 +46,61 @@ export default function Integrals() {
     ));
   };
 
-
   const methods = [
-    { id: 'newton', name: 'Ньютон-Котес', handler: handleNewtonCotes, color: '#8B5CF6' },
-    { id: 'square', name: 'Прямоугольники', handler: handleSquare, color: '#EC4899' },
-    { id: 'trapeze', name: 'Трапеции', handler: handleTrapeze, color: '#06B6D4' },
-    { id: 'simpson', name: 'Симпсон', handler: handleSimpson, color: '#10B981' },
+    { id: 'newton', name: 'Ньютон-Котес' },
+    { id: 'square', name: 'Прямоугольники' },
+    { id: 'trapeze', name: 'Трапеции' },
+    { id: 'simpson', name: 'Симпсон' },
   ];
 
-  function getData() {
-    const f = parseExpression(func);
-    const [a, b] = interval.split(';').map(Number);
-    const stepCount = Function(`return ${steps.replace("^", "**")}`)();
-    
-    if (isNaN(a) || isNaN(b) || isNaN(stepCount)) {
-      alert("Пожалуйста, убедитесь, что все поля введены корректно!");
+  function compute(methodId) {
+    const methods = {
+      square: {
+        func: IntegrationSquare,
+        table: IntegrationSquareTable,
+      },
+      trapeze: {
+        func: IntegrationTrapeze,
+        table: IntegrationTrapezeTable,
+      },
+      simpson: {
+        func: IntegrationSimpson,
+        table: IntegrationSimpsonTable,
+      },
+      newton: {
+        func: IntegrationNewtonCotes,
+        table: IntegrationNewtonCotesTable,
+      }
+    };
+
+    const method = methods[methodId];
+    if (!method) throw new Error("Unknown method");
+
+    if (!table) {
+      const data = getData();
+      if (!data) return null;
+
+      return method.func(data.f, data.a, data.b, data.n);
+    }
+
+    const x = points.map(p => Number(p.x));
+    const y = points.map(p => Number(p.y));
+
+    if (x.some(isNaN) || y.some(isNaN)) {
+      alert("Некорректные точки");
       return null;
     }
-    return { f, a, b, n: stepCount };
-  }
 
-  async function handleCalculation(handler, methodId) {
+    return method.table(x, y);
+  }
+  async function handleCalculation(methodId) {
     try {
       setLoading(true);
       setActiveMethod(methodId);
-      const data = getData();
-      if (!data) return;
-      const res = handler(data.f, data.a, data.b, data.n);
+
+      const res = compute(methodId);
       setResult(res);
+
     } catch (e) {
       alert("Ошибка метода: " + e.message);
     } finally {
@@ -81,85 +109,14 @@ export default function Integrals() {
     }
   }
 
-  const calculateLagrange = () => {
-      // Проверка на заполненность
-      const xValues = [];
-      const yValues = [];
-      
-      for (let point of points) {
-        if (point.x === "" || point.y === "") {
-          alert("Заполните все значения x и y");
-          return;
-        }
-        
-        const x = parseFloat(point.x);
-        const y = parseFloat(point.y);
-        
-        if (isNaN(x) || isNaN(y)) {
-          alert("Введите корректные числа");
-          return;
-        }
-        
-        xValues.push(x);
-        yValues.push(y);
-      }
-      
-      // Проверка на уникальность x
-      const uniqueX = [...new Set(xValues)];
-      if (uniqueX.length !== xValues.length) {
-        alert("Значения x должны быть уникальными");
-        return;
-      }
-      
-      if (xValue === "") {
-        alert("Введите значение x для интерполяции");
-        return;
-      }
-      
-      const xInterp = parseFloat(xValue);
-      if (isNaN(xInterp)) {
-        alert("Введите корректное значение x");
-        return;
-      }
-      
-      setLoading(true);
-      
-      setTimeout(() => {
-        try {
-          // Получаем функцию полинома
-          const lagrangeFunc = LagrangePolynomial(xValues, yValues);
-          
-          // Вычисляем значение
-          const interpolatedValue = lagrangeFunc(xInterp);
-          
-          // Получаем строковое представление полинома
-          const polynomialStr = LagrangePolynomialString(xValues, yValues);
-          
-          setResult(interpolatedValue);
-          setPolynomialString(polynomialStr);
-        } catch (error) {
-          alert("Ошибка при вычислении: " + error.message);
-        } finally {
-          setLoading(false);
-        }
-      }, 100);
-    };
-  
-    const clearAll = () => {
-      setPoints([
-        { x: "", y: "", id: 0 },
-        { x: "", y: "", id: 1 },
-        { x: "", y: "", id: 2 }
-      ]);
-      setXValue("");
-      setResult(null);
-    };
-
-
-  function handleSquare(f, a, b, n) { return IntegrationSquare(f, a, b, n); }
-  function handleTrapeze(f, a, b, n) { return IntegrationTrapeze(f, a, b, n); }
-  function handleSimpson(f, a, b, n) { return IntegrationSimpson(f, a, b, n); }
-  function handleNewtonCotes(f, a, b, n) { return IntegrationNewtonCotes(f, a, b, n); }
+  const clearAll = () => {
+    setPoints([
+      { x: "", y: "", id: 0 },
+      { x: "", y: "", id: 1 },
+      { x: "", y: "", id: 2 }
+    ]);
+    setResult(null);
+  };
 
   return (
   <SafeAreaProvider>
@@ -301,7 +258,7 @@ export default function Integrals() {
           <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
 
             {methods.map((method, index) => (
-              <Pressable key={method.id} onPress={() => handleCalculation(method.handler, method.id)}>
+              <Pressable key={method.id} onPress={() => handleCalculation(method.id)}>
                 {({ pressed }) => (
                   <View
                     className={` px-5 py-5 flex-row items-center justify-between
