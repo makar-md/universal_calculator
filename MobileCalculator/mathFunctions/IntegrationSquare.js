@@ -15,3 +15,14 @@ export const IntegrationSquare = (f, a, b, n) => {
     let result = h * eps;
     return result
 };
+
+export const IntegrationSquareTable = (x, y) => {
+    let eps = 0;
+    let h = x[1] - x[0]
+    for(let item of y){
+        eps += item;
+    }
+
+    let result = h * eps;
+    return result
+};

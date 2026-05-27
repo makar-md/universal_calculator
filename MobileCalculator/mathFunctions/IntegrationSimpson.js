@@ -22,3 +22,19 @@ export const IntegrationSimpson = (f, a, b, n) => {
     let result = (h / 3) * (y[0] + y[y.length - 1] + 2 * even + 4 * not_even)
     return result
 };
+export const IntegrationSimpsonTable = (x,y) => {
+    let h = x[1] - x[0]
+    let even = 0;
+    let not_even = 0;
+
+    for(let i = 1; i < y.length - 1; i++){
+        if (i % 2 === 0) {
+            even += y[i];
+        } else {
+            not_even += y[i];
+        }
+    }
+    
+    let result = (h / 3) * (y[0] + y[y.length - 1] + 2 * even + 4 * not_even)
+    return result
+};

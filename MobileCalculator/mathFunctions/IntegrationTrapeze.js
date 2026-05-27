@@ -18,3 +18,16 @@ export const IntegrationTrapeze = (f, a, b, n) => {
     let result = (h / 2) * (arr[0] + 2 * sum + arr[arr.length - 1]);
     return result;
 };
+
+export const IntegrationTrapezeTable = (x, y) => {
+    let h = x[1] - x[0];
+    
+    // Метод трапеций: (h/2) * (y0 + 2*y1 + 2*y2 + ... + 2*yn-1 + yn)
+    let sum = 0;
+    for(let i = 1; i < y.length - 1; i++) {
+        sum += y[i];  // Суммируем внутренние точки
+    }
+    
+    let result = (h / 2) * (y[0] + 2 * sum + y[y.length - 1]);
+    return result;
+};
