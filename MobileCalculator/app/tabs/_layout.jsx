@@ -39,6 +39,12 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen name="lagrange"
+          options={{ title: 'lagrange', tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons name="math-compass" size={18} color="#ffffff" />
+            ),
+          }}
+        />
     </Tabs>
   );
 }

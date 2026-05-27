@@ -96,23 +96,6 @@ export default function Index() {
           </Text>
         </View>
 
-        {/* Navigation */}
-        <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
-
-          <Link href="/integrals">
-            <View className="px-5 py-5 flex-row justify-between items-center">
-              <Text className="text-white text-lg">
-                Интегрирование
-              </Text>
-
-              <Text className="text-[#8E8E93] text-2xl pl-4">
-                ›
-              </Text>
-            </View>
-          </Link>
-
-        </View>
-
         {/* Input Card */}
         <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
 
