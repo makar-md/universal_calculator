@@ -1,6 +1,8 @@
 import { Tabs } from 'expo-router';
 import { Platform, useWindowDimensions, View, Text } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
+
 
 export default function TabLayout() {
   const { width } = useWindowDimensions();
@@ -28,8 +30,8 @@ export default function TabLayout() {
           tabBarActiveTintColor: "#ff6900",
         }}>
         <Tabs.Screen name="index"
-          options={{ title: 'Home', tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons name="function-variant" size={18} color="#ffffff" />
+          options={{ title: 'linear equation', tabBarIcon: ({ color, focused }) => (
+              <FontAwesome name="superscript" size={18} color="#ffffff" />
             ),
           }}
         />
@@ -42,6 +44,12 @@ export default function TabLayout() {
         <Tabs.Screen name="lagrange"
           options={{ title: 'lagrange', tabBarIcon: ({ color, focused }) => (
               <MaterialCommunityIcons name="math-compass" size={18} color="#ffffff" />
+            ),
+          }}
+        />
+        <Tabs.Screen name="derivatives"
+          options={{ title: 'derivatives', tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons name="function-variant" size={18} color="#ffffff" />
             ),
           }}
         />
