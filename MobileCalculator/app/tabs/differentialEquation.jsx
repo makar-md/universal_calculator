@@ -170,54 +170,28 @@ export default function DifferentialEquations() {
                 <Text className="text-[#8E8E93] text-sm mb-2">
                   Функция f(x, y)
                 </Text>
-                <TextInput 
-                  value={func} 
-                  onChangeText={setFunc} 
-                  placeholder="x + y" 
-                  placeholderTextColor="#8E8E93" 
-                  className="text-white text-lg" 
-                />
+                <TextInput value={func} onChangeText={setFunc} placeholder="x + y" placeholderTextColor="#8E8E93" className="text-white text-lg" />
               </View>
               
               <View className="px-5 py-4 border-b border-[#2C2C2E]">
                 <Text className="text-[#8E8E93] text-sm mb-2">
-                  Начальное значение y₀
+                  Начальное значение y(0)
                 </Text>
-                <TextInput 
-                  value={firstValue} 
-                  onChangeText={setFirstValue} 
-                  placeholder="y(0) = 1" 
-                  placeholderTextColor="#8E8E93" 
-                  keyboardType="numeric"
-                  className="text-white text-lg" 
-                />
+                <TextInput value={firstValue} onChangeText={setFirstValue} placeholder="1" placeholderTextColor="#8E8E93" keyboardType="numeric"className="text-white text-lg" />
               </View>
 
               <View className="px-5 py-4 border-b border-[#2C2C2E]">
                 <Text className="text-[#8E8E93] text-sm mb-2">
                   Интервал [a; b]
                 </Text>
-                <TextInput 
-                  value={interval} 
-                  onChangeText={setInterval} 
-                  placeholder="0;1" 
-                  placeholderTextColor="#8E8E93" 
-                  className="text-white text-lg"
-                />
+                <TextInput value={interval} onChangeText={setInterval} placeholder="0;1" placeholderTextColor="#8E8E93" className="text-white text-lg"/>
               </View>
 
               <View className="px-5 py-4">
                 <Text className="text-[#8E8E93] text-sm mb-2">
                   Количество шагов
                 </Text>
-                <TextInput 
-                  value={steps} 
-                  onChangeText={setSteps} 
-                  keyboardType="numeric" 
-                  placeholder="100" 
-                  placeholderTextColor="#8E8E93" 
-                  className="text-white text-lg" 
-                />
+                <TextInput value={steps} onChangeText={setSteps} keyboardType="numeric" placeholder="100" placeholderTextColor="#8E8E93" className="text-white text-lg" />
               </View>
             </View>
           
@@ -286,7 +260,7 @@ export default function DifferentialEquations() {
                     </Text>
                     </View>
                     
-                    <ScrollView horizontal showsHorizontalScrollIndicator={true} className="flex justify-center">
+                    <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerClassName="justify-center">
                     <View className="flex-1">
                         <View className="flex-row border-b border-[#2C2C2E] bg-[#252527] justify-between">
                             <Text className="text-[#8E8E93] text-sm p-3 min-w-20 text-center">Шаг</Text>
@@ -317,8 +291,6 @@ export default function DifferentialEquations() {
             {/* Steps Table - для метода Эйлера */}
             {activeMethod === 'eyler' && stepsData && (
               <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
-                {console.log(activeMethod)}
-                {console.log(stepsData)}
 
                 <View className="px-5 py-4 bg-[#2C2C2E]">
                   <Text className="text-white text-lg font-semibold text-center">
@@ -326,19 +298,19 @@ export default function DifferentialEquations() {
                   </Text>
                 </View>
                 
-                <ScrollView horizontal showsHorizontalScrollIndicator={true} className="justify-center">
+                <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerClassName="justify-center">
                   <View>
                     <View className="flex-row border-b border-[#2C2C2E] bg-[#252527]">
-                      <Text className="text-[#8E8E93] text-sm p-3 w-20 text-center">Шаг</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-28 text-center">x</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-28 text-center">y</Text>
+                      <Text className="text-[#8E8E93] text-sm p-3 text-center">Шаг</Text>
+                      <Text className="text-[#8E8E93] text-sm px-15 text-center">x</Text>
+                      <Text className="text-[#8E8E93] text-sm p-3 text-center">y</Text>
                     </View>
                     
                     {stepsData.map((step, idx) => (
                       <View key={idx} className="flex-row border-b border-[#2C2C2E]">
-                        <Text className="text-white text-sm p-3 w-20 text-center">{step.iteration}</Text>
-                        <Text className="text-white text-sm p-3 w-28 text-center">{step.x?.toFixed(6)}</Text>
-                        <Text className="text-white text-sm p-3 w-28 text-center">{step.y?.toFixed(6)}</Text>
+                        <Text className="text-white text-sm p-3 text-center">{step.iteration}</Text>
+                        <Text className="text-white text-sm p-3 text-center">{step.x?.toFixed(6)}</Text>
+                        <Text className="text-white text-sm p-3 text-center">{step.y?.toFixed(6)}</Text>
                       </View>
                     ))}
                   </View>
