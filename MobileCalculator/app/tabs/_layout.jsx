@@ -53,6 +53,12 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen name="Differential Equation"
+          options={{ title: 'differentialEquation', tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons name="function-variant" size={18} color="#ffffff" />
+            ),
+          }}
+        />
     </Tabs>
   );
 }

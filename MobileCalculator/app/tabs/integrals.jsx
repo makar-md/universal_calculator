@@ -130,7 +130,7 @@ export default function Integrals() {
             </Text>
 
             <Text className="text-white text-5xl font-bold mt-1">
-              integrals
+              Integrals
             </Text>
           </View>
 
