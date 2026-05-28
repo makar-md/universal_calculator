@@ -144,72 +144,39 @@ export default function Index() {
               <Text className="text-[#8E8E93] text-sm mb-2">
                 Функция f(x)
               </Text>
-              <TextInput
-                value={text}
-                onChangeText={setText}
-                placeholder="sin(x) + ln(x) + x^2"
-                placeholderTextColor="#8E8E93"
-                className="text-white text-lg"
-              />
+              <TextInput value={text} onChangeText={setText} placeholder="sin(x) + ln(x) + x^2" placeholderTextColor="#8E8E93" className="text-white text-lg" />
             </View>
 
             <View className="px-5 py-4 border-b border-[#2C2C2E]">
               <Text className="text-[#8E8E93] text-sm mb-2">
                 Интервал [a;b]
               </Text>
-              <TextInput
-                value={interval}
-                onChangeText={setInterval}
-                placeholder="0;3"
-                placeholderTextColor="#8E8E93"
-                className="text-white text-lg"
-              />
+              <TextInput value={interval} onChangeText={setInterval} placeholder="0;3" placeholderTextColor="#8E8E93" className="text-white text-lg" />
             </View>
 
             <View className="px-5 py-4">
               <Text className="text-[#8E8E93] text-sm mb-2">
                 Точность ε
               </Text>
-              <TextInput
-                value={accuracy}
-                onChangeText={setAccuracy}
-                placeholder="0.001"
-                placeholderTextColor="#8E8E93"
-                className="text-white text-lg"
-              />
+              <TextInput value={accuracy} onChangeText={setAccuracy} placeholder="0.001" placeholderTextColor="#8E8E93" className="text-white text-lg" />
             </View>
           </View>
 
           {/* Buttons */}
           <View className="flex-row gap-3 mb-6">
-            <Pressable
-              onPress={handleBisection}
-              className={`flex-1 py-4 rounded-2xl items-center ${
-                method === "bisection" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]"
-              }`}
-            >
+            <Pressable onPress={handleBisection} className={`flex-1 py-4 rounded-2xl items-center ${ method === "bisection" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]" }`} >
               <Text className="text-white font-semibold">
                 Дихотомия
               </Text>
             </Pressable>
 
-            <Pressable
-              onPress={handleIteration}
-              className={`flex-1 py-4 rounded-2xl items-center ${
-                method === "iteration" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]"
-              }`}
-            >
+            <Pressable onPress={handleIteration} className={`flex-1 py-4 rounded-2xl items-center ${ method === "iteration" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]" }`} >
               <Text className="text-white font-semibold">
                 Итерации
               </Text>
             </Pressable>
 
-            <Pressable
-              onPress={handleNewton}
-              className={`flex-1 py-4 rounded-2xl items-center ${
-                method === "newton" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]"
-              }`}
-            >
+            <Pressable onPress={handleNewton} className={`flex-1 py-4 rounded-2xl items-center ${method === "newton" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]"}`}>
               <Text className="text-white font-semibold">
                 Ньютон
               </Text>

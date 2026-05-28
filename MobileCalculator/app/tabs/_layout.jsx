@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Platform, useWindowDimensions, View, Text } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 
 
@@ -31,7 +32,8 @@ export default function TabLayout() {
         }}>
         <Tabs.Screen name="index"
           options={{ title: 'linear equation', tabBarIcon: ({ color, focused }) => (
-              <FontAwesome name="superscript" size={18} color="#ffffff" />
+              // <FontAwesome name="superscript" size={18} color="#ffffff" />
+              <MaterialCommunityIcons name="chart-line" size={18} color="#ffffff" />
             ),
           }}
         />
@@ -43,7 +45,8 @@ export default function TabLayout() {
         />
         <Tabs.Screen name="lagrange"
           options={{ title: 'lagrange', tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons name="math-compass" size={18} color="#ffffff" />
+              // <MaterialCommunityIcons name="math-compass" size={18} color="#ffffff" />
+              <MaterialCommunityIcons name="vector-polyline" size={18} color="#ffffff" />
             ),
           }}
         />
@@ -53,9 +56,10 @@ export default function TabLayout() {
             ),
           }}
         />
-        <Tabs.Screen name="Differential Equation"
-          options={{ title: 'differentialEquation', tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons name="function-variant" size={18} color="#ffffff" />
+        <Tabs.Screen name="differentialEquation"
+          options={{ title: 'Diff equation', tabBarIcon: ({ color, focused }) => (
+              // <MaterialIcons name="data-object" size={18} color="#ffffff" />
+              <MaterialCommunityIcons name="chart-bell-curve" size={18} color="#ffffff" />
             ),
           }}
         />

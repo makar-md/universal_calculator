@@ -11,8 +11,10 @@ export default function DifferentialEquations() {
   const [firstValue, setFirstValue] = useState('');
   const [interval, setInterval] = useState('');
   const [steps, setSteps] = useState('');
+
   const [result, setResult] = useState(null);
   const [stepsData, setStepsData] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [activeMethod, setActiveMethod] = useState(null);
 
@@ -77,20 +79,13 @@ export default function DifferentialEquations() {
     if (methodId === 'eyler') {
       const res = Eyler(f, y0, h, start, end);
       
-      if (!res || !res.xValues || !res.yValues) {
+      if (!res ) {
         throw new Error('Метод Эйлера не вернул корректные данные');
       }
       
-      const formattedSteps = res.xValues.map((x, idx) => ({
-        iteration: idx,
-        x: x,
-        y: res.yValues[idx],
-        derivative: idx > 0 ? (res.yValues[idx] - res.yValues[idx-1]) / h : 0,
-      }));
+      setStepsData(res);
       
-      setStepsData(formattedSteps);
-      
-      const lastY = res.yValues[res.yValues.length - 1];
+      const lastY = res[res.length - 1].y;
       return {
         value: lastY,
         approximation: `y(${end}) ≈ ${lastY.toFixed(8)}`,
@@ -110,15 +105,7 @@ export default function DifferentialEquations() {
         lastY = step.y + (step.r1 + 2*step.r2 + 2*step.r3 + step.r4) / 6;
       }
       
-      setStepsData(stepsArray.map(step => ({
-        iteration: step.iteration,
-        x: step.x,
-        y: step.y,
-        r1: step.r1,
-        r2: step.r2,
-        r3: step.r3,
-        r4: step.r4,
-      })));
+      setStepsData(stepsArray)
       
       return {
         value: lastY,
@@ -147,7 +134,6 @@ export default function DifferentialEquations() {
       setStepsData([]);
     } finally {
       setLoading(false);
-      setTimeout(() => setActiveMethod(null), 300);
     }
   }
 
@@ -273,6 +259,7 @@ export default function DifferentialEquations() {
               </View>
             </Pressable>
 
+            
             {/* Result */}
             {result && (
               <View className="bg-[#1C1C1E] rounded-[32px] p-8 mb-6">
@@ -289,60 +276,57 @@ export default function DifferentialEquations() {
             )}
 
             {/* Steps Table - для метода Рунге-Кутты */}
-            {activeMethod === 'runge' && stepsData.length > 0 && (
-              <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
-                <View className="px-5 py-4 bg-[#2C2C2E]">
-                  <Text className="text-white text-lg font-semibold text-center">
-                    Пошаговые вычисления (Метод Рунге-Кутты)
-                  </Text>
-                </View>
-                
-                <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                  <View>
-                    <View className="flex-row border-b border-[#2C2C2E] bg-[#252527]">
-                      <Text className="text-[#8E8E93] text-sm p-3 w-20 text-center">Шаг</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-28 text-center">x</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-28 text-center">y</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-24 text-center">k₁</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-24 text-center">k₂</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-24 text-center">k₃</Text>
-                      <Text className="text-[#8E8E93] text-sm p-3 w-24 text-center">k₄</Text>
+            
+
+            {activeMethod === 'runge' && stepsData && stepsData.length > 0 && (
+                <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
+                    <View className="px-5 py-4 bg-[#2C2C2E]">
+                    <Text className="text-white text-lg font-semibold text-center">
+                        Пошаговые вычисления (Метод Рунге-Кутты)
+                    </Text>
                     </View>
                     
-                    {stepsData.slice(0, 20).map((step, idx) => (
-                      <View key={idx} className="flex-row border-b border-[#2C2C2E]">
-                        <Text className="text-white text-sm p-3 w-20 text-center">{step.iteration}</Text>
-                        <Text className="text-white text-sm p-3 w-28 text-center">{step.x?.toFixed(6)}</Text>
-                        <Text className="text-white text-sm p-3 w-28 text-center">{step.y?.toFixed(6)}</Text>
-                        <Text className="text-[#30D158] text-sm p-3 w-24 text-center">{step.r1?.toFixed(6)}</Text>
-                        <Text className="text-[#30D158] text-sm p-3 w-24 text-center">{step.r2?.toFixed(6)}</Text>
-                        <Text className="text-[#30D158] text-sm p-3 w-24 text-center">{step.r3?.toFixed(6)}</Text>
-                        <Text className="text-[#30D158] text-sm p-3 w-24 text-center">{step.r4?.toFixed(6)}</Text>
-                      </View>
-                    ))}
-                    
-                    {stepsData.length > 20 && (
-                      <View className="p-3">
-                        <Text className="text-[#8E8E93] text-center">
-                          ... и ещё {stepsData.length - 20} шагов
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </ScrollView>
-              </View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={true} className="flex justify-center">
+                    <View className="flex-1">
+                        <View className="flex-row border-b border-[#2C2C2E] bg-[#252527] justify-between">
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-20 text-center">Шаг</Text>
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">x</Text>
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">y</Text>
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-24 text-center">k₁</Text>
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-24 text-center">k₂</Text>
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-24 text-center">k₃</Text>
+                            <Text className="text-[#8E8E93] text-sm p-3 min-w-24 text-center">k₄</Text>
+                        </View>
+                        
+                        {stepsData.map((step, idx) => (
+                        <View key={idx} className="flex-row border-b border-[#2C2C2E]">
+                            <Text className="text-white text-sm p-3 min-w-20 text-center">{step.iteration}</Text>
+                            <Text className="text-white text-sm p-3 min-w-28 text-center">{step.x?.toFixed(6)}</Text>
+                            <Text className="text-white text-sm p-3 min-w-28 text-center">{step.y?.toFixed(6)}</Text>
+                            <Text className="text-[#30D158] text-sm p-3 min-w-24 text-center">{step.r1?.toFixed(6)}</Text>
+                            <Text className="text-[#30D158] text-sm p-3 min-w-24 text-center">{step.r2?.toFixed(6)}</Text>
+                            <Text className="text-[#30D158] text-sm p-3 min-w-24 text-center">{step.r3?.toFixed(6)}</Text>
+                            <Text className="text-[#30D158] text-sm p-3 min-w-24 text-center">{step.r4?.toFixed(6)}</Text>
+                        </View>
+                        ))}
+                    </View>
+                    </ScrollView>
+                </View>
             )}
 
             {/* Steps Table - для метода Эйлера */}
-            {activeMethod === 'eyler' && stepsData.length > 0 && (
+            {activeMethod === 'eyler' && stepsData && (
               <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
+                {console.log(activeMethod)}
+                {console.log(stepsData)}
+
                 <View className="px-5 py-4 bg-[#2C2C2E]">
                   <Text className="text-white text-lg font-semibold text-center">
                     Пошаговые вычисления (Метод Эйлера)
                   </Text>
                 </View>
                 
-                <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={true} className="justify-center">
                   <View>
                     <View className="flex-row border-b border-[#2C2C2E] bg-[#252527]">
                       <Text className="text-[#8E8E93] text-sm p-3 w-20 text-center">Шаг</Text>
@@ -350,21 +334,13 @@ export default function DifferentialEquations() {
                       <Text className="text-[#8E8E93] text-sm p-3 w-28 text-center">y</Text>
                     </View>
                     
-                    {stepsData.slice(0, 20).map((step, idx) => (
+                    {stepsData.map((step, idx) => (
                       <View key={idx} className="flex-row border-b border-[#2C2C2E]">
                         <Text className="text-white text-sm p-3 w-20 text-center">{step.iteration}</Text>
                         <Text className="text-white text-sm p-3 w-28 text-center">{step.x?.toFixed(6)}</Text>
                         <Text className="text-white text-sm p-3 w-28 text-center">{step.y?.toFixed(6)}</Text>
                       </View>
                     ))}
-                    
-                    {stepsData.length > 20 && (
-                      <View className="p-3">
-                        <Text className="text-[#8E8E93] text-center">
-                          ... и ещё {stepsData.length - 20} шагов
-                        </Text>
-                      </View>
-                    )}
                   </View>
                 </ScrollView>
               </View>
