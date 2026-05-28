@@ -2,10 +2,10 @@ import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Pla
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
 import { parseExpression } from "../../mathFunctions/parseExpression";
-import { IntegrationSquare, IntegrationSquareTable } from "../../mathFunctions/IntegrationSquare";
-import { IntegrationTrapeze, IntegrationTrapezeTable } from "../../mathFunctions/IntegrationTrapeze";
-import { IntegrationSimpson, IntegrationSimpsonTable } from "../../mathFunctions/IntegrationSimpson";
-import { IntegrationNewtonCotes, IntegrationNewtonCotesTable } from "../../mathFunctions/integrationNewtonCotes";
+import { IntegrationSquare, IntegrationSquareTable } from "../../mathFunctions/Integration/IntegrationSquare";
+import { IntegrationTrapeze, IntegrationTrapezeTable } from "../../mathFunctions/Integration/IntegrationTrapeze";
+import { IntegrationSimpson, IntegrationSimpsonTable } from "../../mathFunctions/Integration/IntegrationSimpson";
+import { IntegrationNewtonCotes, IntegrationNewtonCotesTable } from "../../mathFunctions/Integration/integrationNewtonCotes";
 import "../../global.css";
 
 export default function Integrals() {
