@@ -1,7 +1,7 @@
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
-import { LagrangePolynomial, LagrangePolynomialString } from "../../mathFunctions/lagrange";
+import { LagrangePolynomial, LagrangePolynomialString, LagrangeMaxError, LagrangeError } from "../../mathFunctions/lagrange";
 import "../../global.css";
 
 export default function Lagrange() {
@@ -14,6 +14,8 @@ export default function Lagrange() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [polynomialString, setPolynomialString] = useState("");
+  const [error, setError] = useState(null);
+  const [actualValue, setActualValue] = useState(""); // Для точного значения функции
 
   // Добавление новой точки
   const addPoint = () => {
@@ -94,8 +96,32 @@ export default function Lagrange() {
         
         setResult(interpolatedValue);
         setPolynomialString(polynomialStr);
+        
+        // Расчет погрешности
+        let actualVal = null;
+        if (actualValue.trim() !== "") {
+          actualVal = parseFloat(actualValue);
+          if (!isNaN(actualVal)) {
+            const errorValue = Math.abs(actualVal - interpolatedValue);
+            setError({
+              type: "actual",
+              value: errorValue,
+              message: `Фактическая погрешность: ${errorValue.toExponential(6)}`
+            });
+          } else {
+            // Оценка погрешности без точного значения
+            const errorEstimate = LagrangeError(xValues, yValues, xInterp);
+            setError(errorEstimate);
+          }
+        } else {
+          // Оценка погрешности без точного значения
+          const errorEstimate = LagrangeError(xValues, yValues, xInterp);
+          setError(errorEstimate);
+        }
+        
       } catch (error) {
         alert("Ошибка при вычислении: " + error.message);
+        setError(null);
       } finally {
         setLoading(false);
       }
@@ -111,6 +137,8 @@ export default function Lagrange() {
     setXValue("");
     setResult(null);
     setPolynomialString("");
+    setError(null);
+    setActualValue("");
   };
 
   return (
@@ -190,7 +218,7 @@ export default function Lagrange() {
 
             {/* Значение x для интерполяции */}
             <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
-              <View className="px-5 py-4">
+              <View className="px-5 py-4 border-b border-[#2C2C2E]">
                 <Text className="text-[#8E8E93] text-sm mb-2">
                   ЗНАЧЕНИЕ ДЛЯ ИНТЕРПОЛЯЦИИ
                 </Text>
@@ -200,6 +228,21 @@ export default function Lagrange() {
                   onChangeText={setXValue}
                   keyboardType="numeric"
                   placeholder="Введите x"
+                  placeholderTextColor="#8E8E93"
+                  className="bg-[#2C2C2E] rounded-xl px-4 py-3 text-white text-lg"
+                />
+              </View>
+
+              <View className="px-5 py-4">
+                <Text className="text-[#8E8E93] text-sm mb-2">
+                  ТОЧНОЕ ЗНАЧЕНИЕ (опционально, для погрешности)
+                </Text>
+                
+                <TextInput
+                  value={actualValue}
+                  onChangeText={setActualValue}
+                  keyboardType="numeric"
+                  placeholder="f(x) = ? (оставьте пустым для оценки)"
                   placeholderTextColor="#8E8E93"
                   className="bg-[#2C2C2E] rounded-xl px-4 py-3 text-white text-lg"
                 />
@@ -237,14 +280,64 @@ export default function Lagrange() {
                   </Text>
                 </View>
                 
+                {/* Погрешность */}
+                {error && (
+                  <View className={`rounded-[32px] p-6 mb-4 ${
+                    error.type === "warning" ? "bg-[#FF9F0A]/20 border border-[#FF9F0A]" : 
+                    error.type === "error" ? "bg-[#FF3B30]/20 border border-[#FF3B30]" : 
+                    "bg-[#1C1C1E]"
+                  }`}>
+                    <Text className="text-[#8E8E93] text-sm mb-2">
+                      ПОГРЕШНОСТЬ ИНТЕРПОЛЯЦИИ
+                    </Text>
+                    
+                    {error.type === "actual" && (
+                      <>
+                        <Text className="text-white text-2xl font-bold">
+                          Δ = {error.value.toExponential(8)}
+                        </Text>
+                        <Text className="text-[#8E8E93] text-sm mt-2">
+                          Фактическая погрешность (|точное - приближенное|)
+                        </Text>
+                      </>
+                    )}
+                    
+                    {error.type === "estimate" && (
+                      <>
+                        <Text className="text-[#FF9F0A] text-2xl font-bold">
+                          ≈ {error.value.toExponential(6)}
+                        </Text>
+                        <Text className="text-[#8E8E93] text-sm mt-2">
+                          {error.message}
+                        </Text>
+                        <Text className="text-[#8E8E93] text-xs mt-2">
+                          * Для точной погрешности введите точное значение f(x)
+                        </Text>
+                      </>
+                    )}
+                    
+                    {error.type === "warning" && (
+                      <Text className="text-[#FF9F0A] text-base">
+                        ⚠️ {error.message}
+                      </Text>
+                    )}
+                    
+                    {error.type === "error" && (
+                      <Text className="text-[#FF3B30] text-base">
+                        ❌ {error.message}
+                      </Text>
+                    )}
+                  </View>
+                )}
+                
                 {polynomialString && (
                   <View className="bg-[#1C1C1E] rounded-[32px] p-6">
                     <Text className="text-[#8E8E93] text-sm mb-3">
                       ПОЛИНОМ ЛАГРАНЖА
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                      <Text className="text-white text-lg font-bold">
-                        {polynomialString}
+                      <Text className="text-white text-sm font-mono">
+                        P(x) = {polynomialString}
                       </Text>
                     </ScrollView>
                   </View>
