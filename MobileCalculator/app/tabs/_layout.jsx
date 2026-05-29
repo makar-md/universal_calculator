@@ -19,7 +19,8 @@ export default function TabLayout() {
               gap: 3,
               display: "flex",
               borderWidth:0,
-              borderBlockColor:"#27272a"
+              borderBlockColor:"#27272a",
+              // padding:  10
             },
             hideOnWebMobile && { display: "none" },
           ],
@@ -32,7 +33,6 @@ export default function TabLayout() {
         }}>
         <Tabs.Screen name="index"
           options={{ title: 'linear equation', tabBarIcon: ({ color, focused }) => (
-              // <FontAwesome name="superscript" size={18} color="#ffffff" />
               <MaterialCommunityIcons name="chart-line" size={18} color="#ffffff" />
             ),
           }}
@@ -45,7 +45,6 @@ export default function TabLayout() {
         />
         <Tabs.Screen name="lagrange"
           options={{ title: 'lagrange', tabBarIcon: ({ color, focused }) => (
-              // <MaterialCommunityIcons name="math-compass" size={18} color="#ffffff" />
               <MaterialCommunityIcons name="vector-polyline" size={18} color="#ffffff" />
             ),
           }}
@@ -58,15 +57,13 @@ export default function TabLayout() {
         />
         <Tabs.Screen name="differentialEquation"
           options={{ title: 'Diff equation', tabBarIcon: ({ color, focused }) => (
-              // <MaterialIcons name="data-object" size={18} color="#ffffff" />
               <MaterialCommunityIcons name="chart-bell-curve" size={18} color="#ffffff" />
             ),
           }}
         />
         <Tabs.Screen name="slau"
           options={{ title: 'slau', tabBarIcon: ({ color, focused }) => (
-              // <MaterialIcons name="data-object" size={18} color="#ffffff" />
-              <MaterialCommunityIcons name="chart-bell-curve" size={18} color="#ffffff" />
+              <MaterialCommunityIcons name="matrix" size={12} color="#ffffff" />
             ),
           }}
         />
