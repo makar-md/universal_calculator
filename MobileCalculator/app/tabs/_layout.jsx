@@ -63,6 +63,13 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen name="slau"
+          options={{ title: 'slau', tabBarIcon: ({ color, focused }) => (
+              // <MaterialIcons name="data-object" size={18} color="#ffffff" />
+              <MaterialCommunityIcons name="chart-bell-curve" size={18} color="#ffffff" />
+            ),
+          }}
+        />
     </Tabs>
   );
 }
