@@ -17,9 +17,9 @@ export default function Index() {
   const [method, setMethod] = useState(null);
   const [lambda, setLambda] = useState(null);
 
-  function getData(){
+  function getData() {
     const f = parseExpression(text);
-    
+
     // Парсим интервал
     let a, b;
     if (interval.includes(';')) {
@@ -30,21 +30,21 @@ export default function Index() {
       a = parseFloat(interval);
       b = a + 1;
     }
-    
+
     let eps;
     try {
       eps = Function(`return ${accuracy.replace(/\^/g, '**')}`)();
     } catch (e) {
       eps = parseFloat(accuracy);
     }
-    
+
     if (isNaN(a) || isNaN(b) || isNaN(eps)) {
       setSteps([]);
       setResult(null);
       alert("Пожалуйста, убедитесь, что все поля введены корректно!");
       return null;
     }
-    
+
     const data = {
       f: f,
       a: a,
@@ -127,7 +127,7 @@ export default function Index() {
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-black">
         <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-          
+
           {/* Header */}
           <View className="mt-6 mb-6">
             <Text className="text-[#8E8E93] text-sm">
@@ -164,13 +164,13 @@ export default function Index() {
 
           {/* Buttons */}
           <View className="flex-row gap-3 mb-6">
-            <Pressable onPress={handleBisection} className={`flex-1 py-4 rounded-2xl items-center ${ method === "bisection" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]" }`} >
+            <Pressable onPress={handleBisection} className={`flex-1 py-4 rounded-2xl items-center ${method === "bisection" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]"}`} >
               <Text className="text-white font-semibold">
                 Дихотомия
               </Text>
             </Pressable>
 
-            <Pressable onPress={handleIteration} className={`flex-1 py-4 rounded-2xl items-center ${ method === "iteration" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]" }`} >
+            <Pressable onPress={handleIteration} className={`flex-1 py-4 rounded-2xl items-center ${method === "iteration" ? "bg-[#0A84FF]" : "bg-[#2C2C2E]"}`} >
               <Text className="text-white font-semibold">
                 Итерации
               </Text>
@@ -183,79 +183,193 @@ export default function Index() {
             </Pressable>
           </View>
 
-          {/* Table Header */}
-          {method && steps.length > 0 && (
-            <View className="bg-[#1C1C1E] rounded-t-[24px] px-3 py-3 flex-row">
-              <Text className="text-[#8E8E93] flex-1 text-center">№</Text>
-              
-              {method === "bisection" && (
-                <>
-                  <Text className="text-[#8E8E93] flex-1 text-center">a</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">b</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">mid</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">f(mid)</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">Δ</Text>
-                </>
-              )}
-              
-              {method === "iteration" && (
-                <>
-                  <Text className="text-[#8E8E93] flex-1 text-center">x</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">f(x)</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">xₙₑₓₜ</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">Δ</Text>
-                </>
-              )}
-              
-              {method === "newton" && (
-                <>
-                  <Text className="text-[#8E8E93] flex-1 text-center">x</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">f(x)</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">f'(x)</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">xₙₑₓₜ</Text>
-                  <Text className="text-[#8E8E93] flex-1 text-center">Δ</Text>
-                </>
-              )}
-            </View>
-          )}
-
           {/* Steps Table */}
           {method && steps.length > 0 && (
-            <View className="bg-[#1C1C1E] rounded-b-[24px] overflow-hidden mb-6">
-              {steps.map((row, i) => (
-                <View key={i} className="flex-row px-3 py-3 border-b border-[#2C2C2E]">
-                  <Text className="text-white flex-1 text-center">{row.step}</Text>
-                  
+            <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6 border border-[#2C2C2E]">
+
+              {/* Header */}
+              <View className="px-5 py-4 bg-[#2C2C2E]">
+                <Text className="text-white text-lg font-semibold text-center">
+                  Пошаговые вычисления
+                </Text>
+              </View>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerClassName="justify-center">
+                <View className="flex-1">
+
+                  {/* Заголовки для метода бисекции */}
                   {method === "bisection" && (
-                    <>
-                      <Text className="text-white flex-1 text-center">{row.a.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.b.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.mid.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.fmid.toExponential(4)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.d?.toExponential(4) || (row.b - row.a).toExponential(4)}</Text>
-                    </>
+                    <View className="flex-row border-b border-[#2C2C2E] bg-[#252527]">
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-20 text-center">
+                        Шаг
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        a
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        b
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        mid
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        f(mid)
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        Δ
+                      </Text>
+                    </View>
                   )}
-                  
+
+                  {/* Заголовки для итераций */}
                   {method === "iteration" && (
-                    <>
-                      <Text className="text-white flex-1 text-center">{row.x?.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.fx?.toExponential(4)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.xNext?.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.diff?.toExponential(4)}</Text>
-                    </>
+                    <View className="flex-row border-b border-[#2C2C2E] bg-[#252527]">
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-20 text-center">
+                        Шаг
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        xₙ
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        f(xₙ)
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        xₙ₊₁
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        |xₙ₊₁ - xₙ|
+                      </Text>
+                    </View>
                   )}
-                  
+
+                  {/* Заголовки для Ньютона */}
                   {method === "newton" && (
-                    <>
-                      <Text className="text-white flex-1 text-center">{row.x?.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.fx?.toExponential(4)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.dfx?.toExponential(4)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.xNext?.toFixed(6)}</Text>
-                      <Text className="text-white flex-1 text-center">{row.diff?.toExponential(4)}</Text>
-                    </>
+                    <View className="flex-row border-b border-[#2C2C2E] bg-[#252527]">
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-20 text-center">
+                        Шаг
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        xₙ
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        f(xₙ)
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        f'(xₙ)
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-28 text-center">
+                        xₙ₊₁
+                      </Text>
+
+                      <Text className="text-[#8E8E93] text-sm p-3 min-w-32 text-center">
+                        |Δx|
+                      </Text>
+                    </View>
                   )}
+
+                  {/* Строки */}
+                  {steps.map((row, i) => (
+                    <View key={i} className="flex-row border-b border-[#2C2C2E]">
+                      {/* Bisection */}
+                      {method === "bisection" && (
+                        <>
+                          <Text className="text-white text-sm p-3 min-w-20 text-center">
+                            {row.step}
+                          </Text>
+
+                          <Text className="text-white text-sm p-3 min-w-28 text-center">
+                            {row.a?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-white text-sm p-3 min-w-28 text-center">
+                            {row.b?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-[#4F8CFF] text-sm p-3 min-w-28 text-center font-semibold">
+                            {row.mid?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-[#30D158] text-sm p-3 min-w-32 text-center">
+                            {row.fmid?.toExponential(4)}
+                          </Text>
+
+                          <Text className="text-[#FF9F0A] text-sm p-3 min-w-32 text-center">
+                            {row.d?.toExponential(4) ||
+                              (row.b - row.a).toExponential(4)}
+                          </Text>
+                        </>
+                      )}
+
+                      {/* Iteration */}
+                      {method === "iteration" && (
+                        <>
+                          <Text className="text-white text-sm p-3 min-w-20 text-center">
+                            {row.step}
+                          </Text>
+
+                          <Text className="text-white text-sm p-3 min-w-28 text-center">
+                            {row.x?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-[#30D158] text-sm p-3 min-w-32 text-center">
+                            {row.fx?.toExponential(4)}
+                          </Text>
+
+                          <Text className="text-[#4F8CFF] text-sm p-3 min-w-28 text-center font-semibold">
+                            {row.xNext?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-[#FF9F0A] text-sm p-3 min-w-32 text-center">
+                            {row.diff?.toExponential(4)}
+                          </Text>
+                        </>
+                      )}
+
+                      {/* Newton */}
+                      {method === "newton" && (
+                        <>
+                          <Text className="text-white text-sm p-3 min-w-20 text-center">
+                            {row.step}
+                          </Text>
+
+                          <Text className="text-white text-sm p-3 min-w-28 text-center">
+                            {row.x?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-[#30D158] text-sm p-3 min-w-32 text-center">
+                            {row.fx?.toExponential(4)}
+                          </Text>
+
+                          <Text className="text-[#FF375F] text-sm p-3 min-w-32 text-center">
+                            {row.dfx?.toExponential(4)}
+                          </Text>
+
+                          <Text className="text-[#4F8CFF] text-sm p-3 min-w-28 text-center font-semibold">
+                            {row.xNext?.toFixed(6)}
+                          </Text>
+
+                          <Text className="text-[#FF9F0A] text-sm p-3 min-w-32 text-center">
+                            {row.diff?.toExponential(4)}
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                  ))}
                 </View>
-              ))}
+              </ScrollView>
             </View>
           )}
 
@@ -265,11 +379,11 @@ export default function Index() {
               <Text className="text-[#8E8E93] text-sm mb-2">
                 РЕЗУЛЬТАТ
               </Text>
-              
+
               <Text className="text-white text-4xl font-bold">
                 x = {result.root.toFixed(8)}
               </Text>
-              
+
               <View className="flex-row justify-between mt-4 pt-4 border-t border-[#2C2C2E]">
                 <Text className="text-[#8E8E93]">
                   Метод: {method === "bisection" ? "Дихотомии" : method === "iteration" ? "Простых итераций" : "Ньютона"}
@@ -278,7 +392,7 @@ export default function Index() {
                   Итераций: {result.iterations}
                 </Text>
               </View>
-              
+
               {lambda && (
                 <View className="mt-2">
                   <Text className="text-[#8E8E93] text-xs">
@@ -286,7 +400,7 @@ export default function Index() {
                   </Text>
                 </View>
               )}
-              
+
               <View className="mt-2">
                 <Text className="text-[#8E8E93] text-xs">
                   f(x) = {text}

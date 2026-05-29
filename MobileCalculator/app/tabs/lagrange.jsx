@@ -1,267 +1,376 @@
-import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from "react";
-import { LagrangePolynomial, LagrangePolynomialString, LagrangeMaxError, LagrangeError } from "../../mathFunctions/lagrange";
+import React, { useState } from "react";
+import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Dimensions, Alert} from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { LineChart } from "react-native-gifted-charts";
+import {LagrangePolynomial, LagrangePolynomialString, LagrangeError} from "../../mathFunctions/lagrange";
 import "../../global.css";
 
 export default function Lagrange() {
+  const { width } = Dimensions.get("window");
+
+  const [chartData, setChartData] = useState({
+    curveData: [],
+    originalPoints: [],
+  });
+
+  const [showChart, setShowChart] = useState(false);
+
   const [points, setPoints] = useState([
     { x: "", y: "", id: 0 },
     { x: "", y: "", id: 1 },
-    { x: "", y: "", id: 2 }
+    { x: "", y: "", id: 2 },
   ]);
-  const [xValue, setXValue] = useState("");
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [polynomialString, setPolynomialString] = useState("");
-  const [error, setError] = useState(null);
-  const [actualValue, setActualValue] = useState(""); // Для точного значения функции
 
-  // Добавление новой точки
+  const [xValue, setXValue] = useState("");
+
+  const [result, setResult] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [polynomialString, setPolynomialString] = useState("");
+
+  const [error, setError] = useState(null);
+
+  const [actualValue, setActualValue] = useState("");
+
+  // Добавление точки
   const addPoint = () => {
     const newId = points.length;
-    setPoints([...points, { x: "", y: "", id: newId }]);
+
+    setPoints([
+      ...points,
+      {
+        x: "",
+        y: "",
+        id: newId,
+      },
+    ]);
   };
 
   // Удаление точки
   const removePoint = (id) => {
-    if (points.length > 2) {
-      setPoints(points.filter(point => point.id !== id));
-    } else {
-      alert("Должно быть минимум 2 точки");
+    if (points.length <= 2) {
+      Alert.alert("Ошибка", "Минимум 2 точки");
+      return;
+    }
+
+    setPoints(points.filter((point) => point.id !== id));
+  };
+
+  // Обновление точки
+  const updatePoint = (id, field, value) => {
+    setPoints(
+      points.map((point) =>
+        point.id === id
+          ? {
+              ...point,
+              [field]: value,
+            }
+          : point
+      )
+    );
+  };
+
+  // Генерация данных графика
+  const generateChartData = (lagrangeFunc, xValues, yValues) => {
+    try {
+      const minX = Math.min(...xValues) - 1;
+      const maxX = Math.max(...xValues) + 1;
+
+      const step = (maxX - minX) / 120;
+
+      const curveData = [];
+
+      for (let x = minX; x <= maxX; x += step) {
+        const y = lagrangeFunc(x);
+
+        if (!isNaN(y) && isFinite(y)) {
+          curveData.push({
+            value: y,
+            label: x.toFixed(1),
+            x,
+            hideDataPoint: true,
+          });
+        }
+      }
+
+      const originalPoints = xValues.map((x, index) => ({
+        value: yValues[index],
+        x,
+        label: x.toFixed(1),
+
+        dataPointColor: "#FF9F0A",
+        dataPointRadius: 6,
+
+        showDataPoint: true,
+        hideDataPoint: false,
+      }));
+
+      return {
+        curveData,
+        originalPoints,
+      };
+    } catch (error) {
+      console.error("Ошибка графика:", error);
+
+      return {
+        curveData: [],
+        originalPoints: [],
+      };
     }
   };
 
-  // Обновление значения точки
-  const updatePoint = (id, field, value) => {
-    setPoints(points.map(point => 
-      point.id === id ? { ...point, [field]: value } : point
-    ));
-  };
-
-  // Вычисление полинома Лагранжа
+  // Вычисление
   const calculateLagrange = () => {
-    // Проверка на заполненность
     const xValues = [];
     const yValues = [];
-    
+
     for (let point of points) {
       if (point.x === "" || point.y === "") {
-        alert("Заполните все значения x и y");
+        Alert.alert("Ошибка", "Заполните все поля");
         return;
       }
-      
+
       const x = parseFloat(point.x);
       const y = parseFloat(point.y);
-      
+
       if (isNaN(x) || isNaN(y)) {
-        alert("Введите корректные числа");
+        Alert.alert("Ошибка", "Введите корректные числа");
         return;
       }
-      
+
       xValues.push(x);
       yValues.push(y);
     }
-    
-    // Проверка на уникальность x
+
     const uniqueX = [...new Set(xValues)];
+
     if (uniqueX.length !== xValues.length) {
-      alert("Значения x должны быть уникальными");
+      Alert.alert("Ошибка", "X должны быть уникальными");
       return;
     }
-    
+
     if (xValue === "") {
-      alert("Введите значение x для интерполяции");
+      Alert.alert("Ошибка", "Введите x");
       return;
     }
-    
+
     const xInterp = parseFloat(xValue);
+
     if (isNaN(xInterp)) {
-      alert("Введите корректное значение x");
+      Alert.alert("Ошибка", "Некорректный x");
       return;
     }
-    
+
     setLoading(true);
-    
+
     setTimeout(() => {
       try {
-        // Получаем функцию полинома
         const lagrangeFunc = LagrangePolynomial(xValues, yValues);
-        
-        // Вычисляем значение
+
         const interpolatedValue = lagrangeFunc(xInterp);
-        
-        // Получаем строковое представление полинома
-        const polynomialStr = LagrangePolynomialString(xValues, yValues);
-        
+
+        const polynomialStr = LagrangePolynomialString(
+          xValues,
+          yValues
+        );
+
         setResult(interpolatedValue);
+
         setPolynomialString(polynomialStr);
-        
-        // Расчет погрешности
-        let actualVal = null;
+
+        // График
+        const { curveData, originalPoints } =
+          generateChartData(
+            lagrangeFunc,
+            xValues,
+            yValues
+          );
+
+        setChartData({
+          curveData,
+          originalPoints,
+        });
+
+        setShowChart(true);
+
+        // Погрешность
         if (actualValue.trim() !== "") {
-          actualVal = parseFloat(actualValue);
+          const actualVal = parseFloat(actualValue);
+
           if (!isNaN(actualVal)) {
-            const errorValue = Math.abs(actualVal - interpolatedValue);
+            const errorValue = Math.abs(
+              actualVal - interpolatedValue
+            );
+
             setError({
               type: "actual",
               value: errorValue,
-              message: `Фактическая погрешность: ${errorValue.toExponential(6)}`
+              message: `Фактическая погрешность`,
             });
-          } else {
-            // Оценка погрешности без точного значения
-            const errorEstimate = LagrangeError(xValues, yValues, xInterp);
-            setError(errorEstimate);
           }
         } else {
-          // Оценка погрешности без точного значения
-          const errorEstimate = LagrangeError(xValues, yValues, xInterp);
+          const errorEstimate = LagrangeError(
+            xValues,
+            yValues,
+            xInterp
+          );
+
           setError(errorEstimate);
         }
-        
       } catch (error) {
-        alert("Ошибка при вычислении: " + error.message);
+        Alert.alert(
+          "Ошибка вычисления",
+          error.message
+        );
+
         setError(null);
       } finally {
         setLoading(false);
       }
-    }, 100);
+    }, 150);
   };
 
+  // Очистка
   const clearAll = () => {
     setPoints([
       { x: "", y: "", id: 0 },
       { x: "", y: "", id: 1 },
-      { x: "", y: "", id: 2 }
+      { x: "", y: "", id: 2 },
     ]);
+
     setXValue("");
+
     setResult(null);
+
     setPolynomialString("");
+
     setError(null);
+
     setActualValue("");
+
+    setShowChart(false);
+
+    setChartData({
+      curveData: [],
+      originalPoints: [],
+    });
   };
 
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-black">
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-          <ScrollView showsVerticalScrollIndicator={false} className="flex-1 px-5">
-            
+        <KeyboardAvoidingView behavior={ Platform.OS === "ios" ? "padding": "height"} className="flex-1">
+          <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
             {/* Header */}
-            <View className="mt-4 mb-6">
+            <View className="mt-4 mb-8">
               <Text className="text-zinc-500 text-base">
                 Numerical Methods
               </Text>
+
               <Text className="text-white text-5xl font-bold mt-1">
                 Lagrange
               </Text>
             </View>
 
-            {/* Таблица точек */}
-            <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
-              <View className="px-5 py-4">
-                <Text className="text-[#8E8E93] text-sm mb-2">
-                  ТАБЛИЦА ТОЧЕК
-                </Text>
-                
-                {/* Заголовки таблицы */}
-                <View className="flex-row mb-3 mt-2">
-                  <View className="flex-1">
-                    <Text className="text-[#8E8E93] text-sm">x</Text>
-                  </View>
-                  <View className="flex-1 ml-3">
-                    <Text className="text-[#8E8E93] text-sm">y</Text>
-                  </View>
-                  <View className="w-10" />
+            {/* Таблица */}
+            <View className="bg-[#1C1C1E] rounded-[30px] p-5 mb-6 border border-[#2C2C2E]">
+              <Text className="text-[#8E8E93] text-sm mb-5 tracking-[2px]">
+                ТОЧКИ
+              </Text>
+
+              {points.map((point, index) => (
+                <View key={point.id} className="flex-row items-center mb-4">
+                  <TextInput
+                    value={point.x}
+                    onChangeText={(value) =>
+                      updatePoint(point.id,"x",value)}
+                    placeholder={`x${index}`}
+                    placeholderTextColor="#777"
+                    keyboardType="numeric"
+                    className="flex-1 bg-[#2C2C2E] rounded-2xl px-4 py-4 text-white"
+                  />
+
+                  <TextInput
+                    value={point.y}
+                    onChangeText={(value) =>
+                      updatePoint(point.id,"y",value)}
+                    placeholder={`y${index}`}
+                    placeholderTextColor="#777"
+                    keyboardType="numeric"
+                    className="flex-1 bg-[#2C2C2E] rounded-2xl px-4 py-4 text-white ml-3"
+                  />
+
+                  <Pressable
+                    onPress={() =>
+                      removePoint(point.id)
+                    }
+                    className="ml-3"
+                  >
+                    <Text className="text-red-500 text-3xl">
+                      −
+                    </Text>
+                  </Pressable>
                 </View>
-                
-                {/* Строки таблицы */}
-                {points.map((point, index) => (
-                  <View key={point.id} className="flex-row items-center mb-3">
-                    <View className="flex-1">
-                      <TextInput
-                        value={point.x}
-                        onChangeText={(value) => updatePoint(point.id, "x", value)}
-                        keyboardType="numeric"
-                        placeholder={`x${index}`}
-                        placeholderTextColor="#8E8E93"
-                        className="bg-[#2C2C2E] rounded-xl px-4 py-3 text-white"
-                      />
-                    </View>
-                    
-                    <View className="flex-1 ml-3">
-                      <TextInput
-                        value={point.y}
-                        onChangeText={(value) => updatePoint(point.id, "y", value)}
-                        keyboardType="numeric"
-                        placeholder={`y${index}`}
-                        placeholderTextColor="#8E8E93"
-                        className="bg-[#2C2C2E] rounded-xl px-4 py-3 text-white"
-                      />
-                    </View>
-                    
-                    <Pressable onPress={() => removePoint(point.id)} className="w-10 ml-2">
-                      <Text className="text-red-500 text-2xl text-center">−</Text>
-                    </Pressable>
-                  </View>
-                ))}
-                
-                {/* Кнопка добавления */}
-                <Pressable onPress={addPoint} className="mt-2">
-                  <View className="flex-row items-center justify-center py-3 rounded-xl border border-dashed border-[#0A84FF]">
-                    <Text className="text-[#0A84FF] text-lg mr-2">+</Text>
-                    <Text className="text-[#0A84FF]">Добавить точку</Text>
-                  </View>
-                </Pressable>
-              </View>
+              ))}
+
+              <Pressable onPress={addPoint}>
+                <View className="border border-dashed border-[#0A84FF] rounded-2xl py-4 items-center mt-2">
+                  <Text className="text-[#0A84FF] text-lg">
+                    + Добавить точку
+                  </Text>
+                </View>
+              </Pressable>
             </View>
 
-            {/* Значение x для интерполяции */}
-            <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
-              <View className="px-5 py-4 border-b border-[#2C2C2E]">
-                <Text className="text-[#8E8E93] text-sm mb-2">
-                  ЗНАЧЕНИЕ ДЛЯ ИНТЕРПОЛЯЦИИ
-                </Text>
-                
-                <TextInput
-                  value={xValue}
-                  onChangeText={setXValue}
-                  keyboardType="numeric"
-                  placeholder="Введите x"
-                  placeholderTextColor="#8E8E93"
-                  className="bg-[#2C2C2E] rounded-xl px-4 py-3 text-white text-lg"
-                />
-              </View>
+            {/* Интерполяция */}
+            <View className="bg-[#1C1C1E] rounded-[30px] p-5 mb-6 border border-[#2C2C2E]">
+              <Text className="text-[#8E8E93] text-sm mb-3 tracking-[2px]">
+                ИНТЕРПОЛЯЦИЯ
+              </Text>
 
-              <View className="px-5 py-4">
-                <Text className="text-[#8E8E93] text-sm mb-2">
-                  ТОЧНОЕ ЗНАЧЕНИЕ (опционально, для погрешности)
-                </Text>
-                
-                <TextInput
-                  value={actualValue}
-                  onChangeText={setActualValue}
-                  keyboardType="numeric"
-                  placeholder="f(x) = ? (оставьте пустым для оценки)"
-                  placeholderTextColor="#8E8E93"
-                  className="bg-[#2C2C2E] rounded-xl px-4 py-3 text-white text-lg"
-                />
-              </View>
+              <TextInput
+                value={xValue}
+                onChangeText={setXValue}
+                placeholder="Введите x"
+                placeholderTextColor="#777"
+                keyboardType="numeric"
+                className="bg-[#2C2C2E] rounded-2xl px-4 py-4 text-white text-lg mb-5"
+              />
+
+              <Text className="text-[#8E8E93] text-sm mb-3 tracking-[2px]">
+                ТОЧНОЕ ЗНАЧЕНИЕ (опционально)
+              </Text>
+
+              <TextInput
+                value={actualValue}
+                onChangeText={setActualValue}
+                placeholder="f(x)"
+                placeholderTextColor="#777"
+                keyboardType="numeric"
+                className="bg-[#2C2C2E] rounded-2xl px-4 py-4 text-white text-lg"
+              />
             </View>
 
-            {/* Кнопки управления */}
+            {/* Кнопки */}
             <View className="flex-row gap-4 mb-6">
-              <Pressable onPress={calculateLagrange} className="flex-1">
-                <View className="bg-[#0A84FF] py-4 rounded-2xl">
-                  <Text className="text-white text-center font-semibold text-lg">
+              <Pressable
+                className="flex-1"
+                onPress={calculateLagrange}
+              >
+                <View className="bg-[#0A84FF] rounded-2xl py-5">
+                  <Text className="text-white text-center font-bold text-lg">
                     ВЫЧИСЛИТЬ
                   </Text>
                 </View>
               </Pressable>
-              
-              <Pressable onPress={clearAll} className="flex-1">
-                <View className="bg-[#2C2C2E] py-4 rounded-2xl">
-                  <Text className="text-white text-center font-semibold text-lg">
+
+              <Pressable
+                className="flex-1"
+                onPress={clearAll}
+              >
+                <View className="bg-[#2C2C2E] rounded-2xl py-5">
+                  <Text className="text-white text-center font-bold text-lg">
                     ОЧИСТИТЬ
                   </Text>
                 </View>
@@ -271,90 +380,167 @@ export default function Lagrange() {
             {/* Результат */}
             {result !== null && (
               <View className="mb-6">
-                <View className="bg-[#1C1C1E] rounded-[32px] p-8 items-center mb-4">
-                  <Text className="text-[#8E8E93] text-sm mb-2">
-                    РЕЗУЛЬТАТ ИНТЕРПОЛЯЦИИ
+                <View className="bg-[#1C1C1E] rounded-[32px] p-8 items-center border border-[#2C2C2E]">
+                  <Text className="text-[#8E8E93] text-sm mb-3 tracking-[2px]">
+                    РЕЗУЛЬТАТ
                   </Text>
-                  <Text className="text-white text-5xl font-bold">
-                    f({xValue}) = {result.toFixed(8)}
+
+                  <Text className="text-white text-4xl font-bold text-center">
+                    f({xValue}) ={" "}
+                    {result.toFixed(8)}
                   </Text>
                 </View>
-                
-                {/* Погрешность */}
-                {error && (
-                  <View className={`rounded-[32px] p-6 mb-4 ${
-                    error.type === "warning" ? "bg-[#FF9F0A]/20 border border-[#FF9F0A]" : 
-                    error.type === "error" ? "bg-[#FF3B30]/20 border border-[#FF3B30]" : 
-                    "bg-[#1C1C1E]"
-                  }`}>
-                    <Text className="text-[#8E8E93] text-sm mb-2">
-                      ПОГРЕШНОСТЬ ИНТЕРПОЛЯЦИИ
-                    </Text>
-                    
-                    {error.type === "actual" && (
-                      <>
-                        <Text className="text-white text-2xl font-bold">
-                          Δ = {error.value.toExponential(8)}
-                        </Text>
-                        <Text className="text-[#8E8E93] text-sm mt-2">
-                          Фактическая погрешность (|точное - приближенное|)
-                        </Text>
-                      </>
-                    )}
-                    
-                    {error.type === "estimate" && (
-                      <>
-                        <Text className="text-[#FF9F0A] text-2xl font-bold">
-                          ≈ {error.value.toExponential(6)}
-                        </Text>
-                        <Text className="text-[#8E8E93] text-sm mt-2">
-                          {error.message}
-                        </Text>
-                        <Text className="text-[#8E8E93] text-xs mt-2">
-                          * Для точной погрешности введите точное значение f(x)
-                        </Text>
-                      </>
-                    )}
-                    
-                    {error.type === "warning" && (
-                      <Text className="text-[#FF9F0A] text-base">
-                        ⚠️ {error.message}
-                      </Text>
-                    )}
-                    
-                    {error.type === "error" && (
-                      <Text className="text-[#FF3B30] text-base">
-                        ❌ {error.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-                
-                {polynomialString && (
-                  <View className="bg-[#1C1C1E] rounded-[32px] p-6">
-                    <Text className="text-[#8E8E93] text-sm mb-3">
-                      ПОЛИНОМ ЛАГРАНЖА
-                    </Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                      <Text className="text-white text-sm font-mono">
-                        P(x) = {polynomialString}
-                      </Text>
-                    </ScrollView>
-                  </View>
-                )}
               </View>
             )}
+
+            {/* Погрешность */}
+            {error && (
+              <View className="bg-[#1C1C1E] rounded-[32px] p-6 mb-6 border border-[#2C2C2E]">
+                <Text className="text-[#8E8E93] text-sm mb-3 tracking-[2px]">
+                  ПОГРЕШНОСТЬ
+                </Text>
+
+                <Text className="text-[#FF9F0A] text-2xl font-bold">
+                  {error.value?.toExponential?.(6)}
+                </Text>
+
+                <Text className="text-[#8E8E93] mt-2">
+                  {error.message}
+                </Text>
+              </View>
+            )}
+
+            {/* Полином */}
+            {polynomialString && (
+              <View className="bg-[#1C1C1E] rounded-[32px] p-6 mb-6 border border-[#2C2C2E]">
+                <Text className="text-[#8E8E93] text-sm mb-4 tracking-[2px]">
+                  ПОЛИНОМ ЛАГРАНЖА
+                </Text>
+
+                <ScrollView horizontal>
+                  <Text className="text-white text-sm font-mono">
+                    P(x) = {polynomialString}
+                  </Text>
+                </ScrollView>
+              </View>
+            )}
+
+            {/* График */}
+            {showChart &&
+              chartData?.curveData?.length > 0 && (
+                <View className="mb-10">
+                  <View
+                    className="bg-[#1C1C1E] rounded-[32px] p-6 border border-[#2C2C2E]"
+                    style={{
+                      shadowColor: "#000",
+                      shadowOpacity: 0.25,
+                      shadowRadius: 20,
+                      shadowOffset: {width: 0,height: 10,},
+                      elevation: 10,
+                    }}
+                  >
+                    <Text className="text-[#8E8E93] text-sm mb-5 text-center tracking-[2px]">
+                      ГРАФИК ПОЛИНОМА
+                    </Text>
+
+                    <View
+                      style={{alignItems: "center",}}>
+                      <LineChart
+                        areaChart
+                        curved
+                        data={[
+                          ...chartData.curveData,
+                          ...chartData.originalPoints,
+                        ]}
+                        width={width - 80}
+                        height={280}
+                        color="#4F8CFF"
+                        thickness={3}
+                        startFillColor="#4F8CFF"
+                        endFillColor="#4F8CFF"
+                        startOpacity={0.35}
+                        endOpacity={0.03}
+                        spacing={12}
+                        initialSpacing={10}
+                        hideRules={false}
+                        rulesColor="rgba(255,255,255,0.06)"
+                        rulesType="solid"
+                        yAxisColor="#3A3A3C"
+                        xAxisColor="#3A3A3C"
+                        yAxisTextStyle={{
+                          color: "#8E8E93",
+                          fontSize: 11,
+                        }}
+                        xAxisLabelTextStyle={{
+                          color: "#8E8E93",
+                          fontSize: 11,
+                        }}
+                        noOfSections={5}
+                        maxValue={
+                          Math.max(
+                            ...chartData.curveData.map((d) => d.value),
+                            ...chartData.originalPoints.map((d) => d.value)) * 1.15
+                        }
+                        minValue={
+                          Math.min(
+                            ...chartData.curveData.map((d) => d.value),
+                            ...chartData.originalPoints.map((d) => d.value)) * 1.15
+                        }
+                        isAnimated
+                        animationDuration={1200}
+                        showVerticalLines={false}
+                        pointerConfig={{
+                          activatePointersOnLongPress: true,
+                          pointerStripHeight: 280,
+                          pointerStripColor:"#4F8CFF",
+                          pointerStripWidth: 1,
+                          pointerColor:"#4F8CFF",
+                          radius: 6,
+                          pointerLabelWidth: 120,
+                          pointerLabelHeight: 70,
+
+                          autoAdjustPointerLabelPosition: true,
+
+                          pointerLabelComponent:
+                            (items) => {
+                              return (
+                                <View
+                                  className="bg-[#2C2C2E] rounded-2xl px-4 py-3 border border-[#3A3A3C]"
+                                  style={{
+                                    shadowColor:"#000",
+                                    shadowOpacity:0.2,
+                                    shadowRadius: 10,
+                                    elevation: 5,}}
+                                >
+                                  <Text className="text-[#8E8E93] text-xs">
+                                    x ={" "} {items[0]?.x?.toFixed(3)}
+                                  </Text>
+
+                                  <Text className="text-white text-sm font-bold mt-1">
+                                    y ={" "} {items[0]?.value?.toFixed(6)}
+                                  </Text>
+                                </View>
+                              );
+                            },
+                        }}
+                      />
+                    </View>
+                  </View>
+                </View>
+              )}
 
             {/* Loading */}
             {loading && (
-              <View className="absolute inset-0 bg-black/50 justify-center items-center">
-                <View className="bg-[#1C1C1E] rounded-[28px] p-8 items-center">
-                  <ActivityIndicator size="large" color="#0A84FF" />
-                  <Text className="text-white mt-4">Вычисление полинома...</Text>
+              <View className="absolute inset-0 bg-black/60 justify-center items-center">
+                <View className="bg-[#1C1C1E] rounded-[32px] p-8 items-center border border-[#2C2C2E]">
+                  <ActivityIndicator size="large" color="#0A84FF"/>
+
+                  <Text className="text-white mt-4 text-lg">
+                    Вычисление...
+                  </Text>
                 </View>
               </View>
             )}
-
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
