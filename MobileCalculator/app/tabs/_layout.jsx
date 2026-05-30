@@ -37,6 +37,12 @@ export default function TabLayout() {
             ),
           }}
         />
+        {/* <Tabs.Screen name="errorRates"
+          options={{ title: 'error rates', tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons name="matrix" size={12} color="#ffffff" />
+            ),
+          }}
+        /> */}
         <Tabs.Screen name="integrals"
           options={{ title: 'integrals', tabBarIcon: ({ color, focused }) => (
               <MaterialCommunityIcons name="math-integral" size={18} color="#ffffff" />
