@@ -37,12 +37,13 @@ export default function TabLayout() {
             ),
           }}
         />
-        {/* <Tabs.Screen name="errorRates"
+        <Tabs.Screen name="errorRates"
           options={{ title: 'error rates', tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons name="matrix" size={12} color="#ffffff" />
+              // <MaterialCommunityIcons name="matrix" size={12} color="#ffffff" />
+              <Text className="font-bold text-xl text-white">±</Text>
             ),
           }}
-        /> */}
+        />
         <Tabs.Screen name="integrals"
           options={{ title: 'integrals', tabBarIcon: ({ color, focused }) => (
               <MaterialCommunityIcons name="math-integral" size={18} color="#ffffff" />
@@ -69,7 +70,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen name="slau"
           options={{ title: 'slau', tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons name="matrix" size={12} color="#ffffff" />
+              <MaterialCommunityIcons name="matrix" size={20} color="#ffffff" />
             ),
           }}
         />

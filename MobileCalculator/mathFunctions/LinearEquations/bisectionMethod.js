@@ -1,26 +1,40 @@
+/**
+* Численное решение линейных уравнений методом Дихотомии
+* Табличный вариант
+* @param f   функция
+* @param a   граница решения уравнения
+* @param b   граница решения уравнения
+* @param eps точность
+*
+* @returns объект, содержащий массив шагов, найденный корень и количество итераций
+*/
 export const bisectionMethod = (f, a, b, eps) => {
-  let fa = f(a);
-  let fb = f(b);
+  let fa = f(a);                    // значение функции на левой границе
+  let fb = f(b);                    // значение функции на правой границе
 
+  // проверка условия сходимости (функция должна иметь разные знаки на концах)
   if (fa * fb > 0) {
     throw new Error("f(a) * f(b) > 0");
   }
+  // проверка, что функция определена на интервале
   if (!isFinite(fa) || !isFinite(fb)) {
     throw new Error("Функция не определена на интервале");
   }
 
-  let left = a;
-  let right = b;
-  let mid = left;
+  let left = a;                     // левая граница текущего интервала
+  let right = b;                    // правая граница текущего интервала
+  let mid = left;                   // середина интервала (корень)
 
-  let stepArray = [];
-  let stepCount = 0;
+  let stepArray = [];               // массив для хранения шагов вычисления
+  let stepCount = 0;                // счетчик итераций
 
+  // основной цикл: продолжаем пока длина интервала больше заданной точности
   while ((right - left) / 2 > eps) {
-    mid = (left + right) / 2;
-    const fmid = f(mid);
-    stepCount++;
+    mid = (left + right) / 2;       // вычисляем середину интервала
+    const fmid = f(mid);            // значение функции в середине
+    stepCount++;                    // увеличиваем счетчик итераций
 
+    // сохраняем данные текущего шага
     stepArray.push({
       step: stepCount,
       a: left,
@@ -32,23 +46,26 @@ export const bisectionMethod = (f, a, b, eps) => {
       fmid: fmid
     });
 
+    // определяем новую границу интервала
     if (fa * fmid <= 0) {
-      right = mid;
-      fb = fmid;
+      right = mid;                  // корень в левой половине
+      fb = fmid;                    // обновляем значение на правой границе
     } else {
-      left = mid;
-      fa = fmid;
+      left = mid;                   // корень в правой половине
+      fa = fmid;                    // обновляем значение на левой границе
     }
+    // проверка на корректность вычислений
     if (!isFinite(fmid)) {
       throw new Error("Ошибка вычисления внутри метода");
     }
 
+    // защита от бесконечного цикла
     if (stepCount > 1000) break;
   }
-
+  
   return {
-    steps: stepArray,
-    root: mid,
-    iterations: stepCount
+    steps: stepArray,               
+    root: mid,                      
+    iterations: stepCount           
   };
 };

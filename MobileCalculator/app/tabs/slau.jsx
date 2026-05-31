@@ -1,7 +1,7 @@
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from "react";
-import { iterationSystem, parseSystem, createSystemFromEquations } from "../../mathFunctions/systemEquastion/systemEquastion";
+import { iterationSystem, createSystemFromEquations } from "../../mathFunctions/systemEquastion/systemEquastion";
 import "../../global.css";
 
 export default function SystemIteration() {
