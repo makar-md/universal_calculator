@@ -9,20 +9,20 @@ import { IntegrationNewtonCotes, IntegrationNewtonCotesTable } from "../../mathF
 import "../../global.css";
 
 export default function Integrals() {
-  const [func, setFunc] = useState('');
-  const [interval, setInterval] = useState('');
-  const [steps, setSteps] = useState('');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [activeMethod, setActiveMethod] = useState(null);
-  const [table, setTable] = useState(false);
-  const [points, setPoints] = useState([
-    { x: "", y: "", id: 0 },
-    { x: "", y: "", id: 1 },
-    { x: "", y: "", id: 2 }
-  ]);
-  const [xValue, setXValue] = useState("");
-  const [yValue, setYValue] = useState("");
+  const [func, setFunc] = useState('');                              // состояние для хранения строки функции (аналитический метод)
+const [interval, setInterval] = useState('');                      // состояние для хранения интервала интегрирования [a; b]
+const [steps, setSteps] = useState('');                            // состояние для хранения количества шагов (n)
+const [result, setResult] = useState(null);                        // состояние для хранения результата интегрирования
+const [loading, setLoading] = useState(false);                     // состояние для индикатора загрузки
+const [activeMethod, setActiveMethod] = useState(null);            // состояние для подсветки активного метода
+const [table, setTable] = useState(false);                         // состояние для выбора режима: табличный (true) или аналитический (false)
+const [points, setPoints] = useState([                             // состояние для хранения таблицы точек (x, y)
+  { x: "", y: "", id: 0 },
+  { x: "", y: "", id: 1 },
+  { x: "", y: "", id: 2 }
+]);
+const [xValue, setXValue] = useState("");                          // состояние для значения x при интерполяции (не используется в интегрировании)
+const [yValue, setYValue] = useState("");                          // состояние для значения y (не используется в интегрировании)
 
   // Добавление новой точки
   const addPoint = () => {
@@ -53,6 +53,7 @@ export default function Integrals() {
     { id: 'simpson', name: 'Симпсон' },
   ];
 
+  // вычисление
   function compute(methodId) {
     const methods = {
       square: {
@@ -93,6 +94,7 @@ export default function Integrals() {
 
     return method.table(x, y);
   }
+  // обработка кнопки вычислить
   async function handleCalculation(methodId) {
     try {
       setLoading(true);
@@ -109,6 +111,7 @@ export default function Integrals() {
     }
   }
 
+  //очистка полей
   const clearAll = () => {
     setPoints([
       { x: "", y: "", id: 0 },

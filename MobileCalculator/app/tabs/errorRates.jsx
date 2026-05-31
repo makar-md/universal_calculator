@@ -5,38 +5,49 @@ import { useState } from "react";
 import "../../global.css";
 
 export default function ErrorAnalysis() {
+  // состояние для выбора типа задачи (a, b или c)
   const [taskType, setTaskType] = useState('a');
   
-  const [exact1, setExact1] = useState('');
-  const [approx1, setApprox1] = useState('');
-  const [exact2, setExact2] = useState('');
-  const [approx2, setApprox2] = useState('');
+  // состояния для задачи а (сравнение двух равенств)
+  const [exact1, setExact1] = useState('');      // точное значение первого числа
+  const [approx1, setApprox1] = useState('');    // приближённое значение первого числа
+  const [exact2, setExact2] = useState('');      // точное значение второго числа
+  const [approx2, setApprox2] = useState('');    // приближённое значение второго числа
   
-  const [bNumber, setBNumber] = useState('');
-  const [bError, setBError] = useState('');
-  const [bErrorType, setBErrorType] = useState('relative');
+  // состояния для задачи б (округление числа по погрешности)
+  const [bNumber, setBNumber] = useState('');               // исходное число
+  const [bError, setBError] = useState('');                 // значение погрешности
+  const [bErrorType, setBErrorType] = useState('relative'); // тип погрешности (relative/absolute)
   
-  const [cNumber, setCNumber] = useState('');
-  
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // состояние для задачи в (предельные погрешности)
+  const [cNumber, setCNumber] = useState('');     // приближённое число
+  const [result, setResult] = useState(null);     // состояние для хранения результата вычислений
+  const [loading, setLoading] = useState(false);  // состояние загрузки (индикатор выполнения)
 
+  /**
+  * Обработчик нажатия кнопки вычисления
+  * Выполняет расчёты в зависимости от выбранного типа задачи
+  */
   const handleSolve = () => {
-    setLoading(true);
-    
+    setLoading(true);                              
     setTimeout(() => {
       try {
+        // задача а: сравнение точности двух равенств
         if (taskType === 'a') {
+          // проверка заполнения всех полей
           if (!exact1 || !approx1 || !exact2 || !approx2) {
             throw new Error('Заполните все поля');
           }
+          // вычисление погрешностей и сравнение
           const res = compareEqualities(
             parseFloat(exact1), parseFloat(approx1),
             parseFloat(exact2), parseFloat(approx2)
           );
-          setResult(res);
+          setResult(res);                          // сохранение результата
         } 
+        // задача б: округление числа по погрешности
         else if (taskType === 'b') {
+          // проверка заполнения полей
           if (!bNumber) {
             throw new Error('Введите число');
           }
@@ -44,30 +55,39 @@ export default function ErrorAnalysis() {
             throw new Error('Введите погрешность');
           }
           
+          // выбор метода округления в зависимости от типа погрешности
           if (bErrorType === 'relative') {
+            // округление по относительной погрешности
             const res = roundByRelativeError(parseFloat(bNumber), parseFloat(bError));
             setResult(res);
           } else {
+            // округление по абсолютной погрешности
             const res = roundByAbsoluteError(parseFloat(bNumber), parseFloat(bError));
             setResult(res);
           }
         } 
+        // задача в: нахождение предельных погрешностей
         else if (taskType === 'c') {
+          // проверка заполнения поля
           if (!cNumber) {
             throw new Error('Введите число');
           }
+          // вычисление предельных абсолютной и относительной погрешностей
           const res = findLimitErrors(parseFloat(cNumber));
           setResult(res);
         }
       } catch (error) {
-        alert("Ошибка: " + error.message);
-        setResult(null);
+        alert("Ошибка: " + error.message);        
+        setResult(null);                           
       } finally {
-        setLoading(false);
+        setLoading(false);                         
       }
     }, 100);
   };
 
+  /**
+  * Очистка всех полей ввода и результата
+  */
   const clearAll = () => {
     setExact1('');
     setApprox1('');

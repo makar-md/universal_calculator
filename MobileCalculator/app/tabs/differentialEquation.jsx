@@ -7,52 +7,67 @@ import { Runge } from "../../mathFunctions/derivatives/runge";
 import "../../global.css";
 
 export default function DifferentialEquations() {
-  const [func, setFunc] = useState('');
-  const [firstValue, setFirstValue] = useState('');
-  const [interval, setInterval] = useState('');
-  const [steps, setSteps] = useState('');
+  const [func, setFunc] = useState('');                     // состояние для ввода функции f(x, y)
+  const [firstValue, setFirstValue] = useState('');         // состояние для начального условия y₀
+  const [interval, setInterval] = useState('');             // состояние для интервала [a; b]
+  const [steps, setSteps] = useState('');                   // состояние для количества шагов
+  const [result, setResult] = useState(null);               // состояние для хранения результата вычислений
+  const [stepsData, setStepsData] = useState([]);           // состояние для хранения пошаговых данных
+  const [loading, setLoading] = useState(false);            // состояние загрузки (индикатор выполнения)
+  const [activeMethod, setActiveMethod] = useState(null);   // состояние активного метода (подсветка кнопки)
 
-  const [result, setResult] = useState(null);
-  const [stepsData, setStepsData] = useState([]);
-
-  const [loading, setLoading] = useState(false);
-  const [activeMethod, setActiveMethod] = useState(null);
-
+  // список доступных методов решения
   const methods = [
     { id: 'eyler', name: 'Метод Эйлера' },
     { id: 'runge', name: 'Метод Рунге-Кутты 4-го порядка' },
   ];
 
+  /**
+  * Парсинг строки функции в функцию от двух переменных (x, y)
+  * @param expr - строковое выражение (например: "x + y" или "-y")
+  * @returns функция, принимающая (x, y) и возвращающая значение
+  */
   function parseFunction(expr) {
-    const parsed = parseExpression(expr);
+    const parsed = parseExpression(expr);           // базовый парсер для одного аргумента
     return (x, y) => {
-        const exprWithY = expr.replace(/y/g, `(${y})`);
-        const tempFn = parseExpression(exprWithY);
-        return tempFn(x);
+      // замена переменной y на её числовое значение в выражении
+      const exprWithY = expr.replace(/y/g, `(${y})`);
+      const tempFn = parseExpression(exprWithY);    // временная функция с подставленным y
+      return tempFn(x);                             // вычисление значения при заданном x
     };
   }
 
+  /**
+  * Вычисление дифференциального уравнения выбранным методом
+  * @param methodId - идентификатор метода ('eyler' или 'runge')
+  * @returns объект с результатом (значение, аппроксимация, название метода)
+  */
   function compute(methodId) {
+    // валидация ввода функции
     if (!func.trim()) {
       throw new Error('Введите функцию f(x, y)');
     }
+    // валидация начального значения
     if (!firstValue.trim()) {
       throw new Error('Введите начальное значение y₀');
     }
+    // валидация интервала
     if (!interval.trim()) {
       throw new Error('Введите интервал [a; b]');
     }
+    // валидация количества шагов
     if (!steps.trim()) {
       throw new Error('Введите количество шагов');
     }
 
-    const f = parseFunction(func);
+    const f = parseFunction(func);                    // преобразование строки в функцию
     
-    const y0 = parseFloat(firstValue);
+    const y0 = parseFloat(firstValue);                // начальное значение
     if (isNaN(y0)) {
       throw new Error('Начальное значение должно быть числом');
     }
     
+    // парсинг интервала [a; b] (поддерживаются разделители ; и ,)
     let a, b;
     if (interval.includes(';')) {
       [a, b] = interval.split(';').map(Number);
@@ -67,24 +82,28 @@ export default function DifferentialEquations() {
       throw new Error('Интервал должен быть в формате: a;b (например: 0;1)');
     }
 
+    // парсинг количества шагов
     const n = parseInt(steps, 10);
     if (isNaN(n) || n <= 0) {
       throw new Error('Количество шагов должно быть положительным целым числом');
     }
     
+    // вычисление шага h
     const h = (Math.max(a, b) - Math.min(a, b)) / n;
-    const start = Math.min(a, b);
-    const end = Math.max(a, b);
+    const start = Math.min(a, b);                    // левая граница
+    const end = Math.max(a, b);                      // правая граница
     
+    // метод Эйлера
     if (methodId === 'eyler') {
-      const res = Eyler(f, y0, h, start, end);
+      const res = Eyler(f, y0, h, start, end);       // вызов метода Эйлера
       
-      if (!res ) {
+      if (!res) {
         throw new Error('Метод Эйлера не вернул корректные данные');
       }
       
-      setStepsData(res);
+      setStepsData(res);                             // сохранение пошаговых данных
       
+      // последнее значение y
       const lastY = res[res.length - 1].y;
       return {
         value: lastY,
@@ -92,20 +111,22 @@ export default function DifferentialEquations() {
         method: 'Эйлера'
       };
       
+    // метод Рунге-Кутты 4-го порядка
     } else if (methodId === 'runge') {
-      const stepsArray = Runge(f, y0, h, start, end);
+      const stepsArray = Runge(f, y0, h, start, end); // вызов метода Рунге-Кутты
       
       if (!stepsArray || !Array.isArray(stepsArray)) {
         throw new Error('Метод Рунге-Кутты не вернул корректные данные');
       }
       
+      // вычисление последнего значения y из пошаговых данных
       let lastY = y0;
       for (let i = 0; i < stepsArray.length; i++) {
         const step = stepsArray[i];
         lastY = step.y + (step.r1 + 2*step.r2 + 2*step.r3 + step.r4) / 6;
       }
       
-      setStepsData(stepsArray)
+      setStepsData(stepsArray);                      // сохранение пошаговых данных
       
       return {
         value: lastY,
@@ -117,15 +138,19 @@ export default function DifferentialEquations() {
     return null;
   }
 
+  /**
+  * Обработчик нажатия кнопки вычисления
+  * @param methodId - идентификатор выбранного метода
+  */
   async function handleCalculation(methodId) {
     try {
-      setLoading(true);
-      setActiveMethod(methodId);
-      setStepsData([]);
-      setResult(null);
+      setLoading(true);                              
+      setActiveMethod(methodId);                     
+      setStepsData([]);                              
+      setResult(null);                               
       
-      const res = compute(methodId);
-      setResult(res);
+      const res = compute(methodId);                 // вычисление
+      setResult(res);                                // сохранение результата
       
     } catch (e) {
       console.error('Ошибка:', e);
@@ -133,18 +158,21 @@ export default function DifferentialEquations() {
       setResult(null);
       setStepsData([]);
     } finally {
-      setLoading(false);
+      setLoading(false);                             
     }
   }
 
+  /**
+  * Очистка всех полей и результатов
+  */
   function clearAll() {
-    setFunc('');
-    setFirstValue('');
-    setInterval('');
-    setSteps('');
-    setResult(null);
-    setStepsData([]);
-    setActiveMethod(null);
+    setFunc('');                                     // очистка функции
+    setFirstValue('');                               // очистка начального значения
+    setInterval('');                                 // очистка интервала
+    setSteps('');                                    // очистка количества шагов
+    setResult(null);                                 // очистка результата
+    setStepsData([]);                                // очистка пошаговых данных
+    setActiveMethod(null);                           // сброс активного метода
   }
 
 
@@ -250,8 +278,6 @@ export default function DifferentialEquations() {
             )}
 
             {/* Steps Table - для метода Рунге-Кутты */}
-            
-
             {activeMethod === 'runge' && stepsData && stepsData.length > 0 && (
                 <View className="bg-[#1C1C1E] rounded-[28px] overflow-hidden mb-6">
                     <View className="px-5 py-4 bg-[#2C2C2E]">

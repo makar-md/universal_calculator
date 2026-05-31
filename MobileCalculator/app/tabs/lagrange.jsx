@@ -6,32 +6,23 @@ import {LagrangePolynomial, LagrangePolynomialString, LagrangeError} from "../..
 import "../../global.css";
 
 export default function Lagrange() {
-  const { width } = Dimensions.get("window");
-
-  const [chartData, setChartData] = useState({
-    curveData: [],
-    originalPoints: [],
+  const { width } = Dimensions.get("window");                       // ширина экрана для адаптации графика
+  const [chartData, setChartData] = useState({                      // данные для отображения графика
+    curveData: [],                                                  // точки интерполяционной кривой
+    originalPoints: [],                                             // исходные узловые точки
   });
-
-  const [showChart, setShowChart] = useState(false);
-
-  const [points, setPoints] = useState([
+  const [showChart, setShowChart] = useState(false);                // флаг отображения графика
+  const [points, setPoints] = useState([                            // таблица узлов интерполяции (x, y)
     { x: "", y: "", id: 0 },
     { x: "", y: "", id: 1 },
     { x: "", y: "", id: 2 },
   ]);
-
-  const [xValue, setXValue] = useState("");
-
-  const [result, setResult] = useState(null);
-
-  const [loading, setLoading] = useState(false);
-
-  const [polynomialString, setPolynomialString] = useState("");
-
-  const [error, setError] = useState(null);
-
-  const [actualValue, setActualValue] = useState("");
+  const [xValue, setXValue] = useState("");                         // значение x для интерполяции
+  const [result, setResult] = useState(null);                       // результат интерполяции (значение в точке)
+  const [loading, setLoading] = useState(false);                    // индикатор загрузки
+  const [polynomialString, setPolynomialString] = useState("");     // строковое представление полинома Лагранжа
+  const [error, setError] = useState(null);                         // состояние для хранения ошибки
+  const [actualValue, setActualValue] = useState("");               // точное значение функции (для расчёта погрешности)
 
   // Добавление точки
   const addPoint = () => {

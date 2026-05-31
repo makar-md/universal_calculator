@@ -9,14 +9,17 @@ import { Link } from 'expo-router';
 import "../../global.css";
 
 export default function Index() {
-  const [text, setText] = useState('');
-  const [interval, setInterval] = useState('');
-  const [accuracy, setAccuracy] = useState('');
-  const [steps, setSteps] = useState([]);
-  const [result, setResult] = useState(null);
-  const [method, setMethod] = useState(null);
-  const [lambda, setLambda] = useState(null);
+  const [text, setText] = useState('');                              // состояние для хранения строки функции
+  const [interval, setInterval] = useState('');                      // состояние для хранения интервала [a; b]
+  const [accuracy, setAccuracy] = useState('');                      // состояние для хранения точности вычислений
+  const [steps, setSteps] = useState([]);                            // состояние для хранения пошаговых данных вычислений
+  const [result, setResult] = useState(null);                        // состояние для хранения результата (корень и количество итераций)
+  const [method, setMethod] = useState(null);                        // состояние для хранения активного метода решения
+  const [lambda, setLambda] = useState(null);                        // состояние для хранения параметра lambda (для метода итераций)
 
+  /**
+   * сбор и валидация данных из полей ввода
+   */
   function getData() {
     const f = parseExpression(text);
 
@@ -54,6 +57,9 @@ export default function Index() {
     return data;
   }
 
+  /**
+   * обработчик метода половинного деления (дихотомии)
+   */
   const handleBisection = () => {
     setMethod("bisection");
     setLambda(null);
@@ -76,6 +82,9 @@ export default function Index() {
     }
   };
 
+  /**
+   * обработчик метода итераций
+   */
   const handleIteration = () => {
     setMethod("iteration");
     setLambda(null);
@@ -100,6 +109,9 @@ export default function Index() {
     }
   };
 
+  /**
+   * обработчик метода Ньютона
+   */
   const handleNewton = () => {
     setMethod("newton");
     setLambda(null);

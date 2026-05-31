@@ -5,18 +5,22 @@ import { iterationSystem, createSystemFromEquations } from "../../mathFunctions/
 import "../../global.css";
 
 export default function SystemIteration() {
-  const [equations, setEquations] = useState(['', '', '', '']);
-  const [eps, setEps] = useState('0.001');
-  const [result, setResult] = useState(null);
-  const [stepsData, setStepsData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [equations, setEquations] = useState(['', '', '', '']);      // массив строк уравнений системы (4 уравнения)
+  const [eps, setEps] = useState('0.001');                           // точность решения системы
+  const [result, setResult] = useState(null);                        // результат решения (корни системы)
+  const [stepsData, setStepsData] = useState([]);                    // пошаговые данные итерационного процесса
+  const [loading, setLoading] = useState(false);                     // индикатор загрузки
 
+  // обновление уравнения по индексу
   const updateEquation = (index, value) => {
     const newEquations = [...equations];
     newEquations[index] = value;
     setEquations(newEquations);
   };
 
+  /**
+   * вычисление
+   */
   const handleSolve = () => {
     setLoading(true);
     
@@ -58,6 +62,9 @@ export default function SystemIteration() {
     }, 100);
   };
 
+  /**
+   * Очистка полей
+   */
   const clearAll = () => {
     setEquations(['', '', '', '']);
     setEps('0.001');

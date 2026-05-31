@@ -5,41 +5,61 @@ import { differentiationFirst, differentiationSecond} from "../../mathFunctions/
 import "../../global.css";
 
 export default function derivatives() {
+  // состояние массива точек (x, y) с уникальными id
   const [points, setPoints] = useState([
     { x: "", y: "", id: 0 },
     { x: "", y: "", id: 1 },
     { x: "", y: "", id: 2 },
     { x: "", y: "", id: 3 }
   ]);
-  const [error, setError] = useState(null);
-  const [firstResult, setFirstResult] = useState(null);
-  const [secondResult, setSecondResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  
+  const [error, setError] = useState(null);             // состояние для хранения ошибок
+  const [firstResult, setFirstResult] = useState(null);   // результат для первой производной
+  const [secondResult, setSecondResult] = useState(null); // результат для второй производной
+  const [loading, setLoading] = useState(false);          // состояние загрузки
 
+  /**
+  * Добавление новой точки в таблицу
+  * Присваивает новый id = длине массива
+  */
   const addPoint = () => {
-    const newId = points.length;
-    setPoints([...points, { x: "", y: "", id: newId }]);
+    const newId = points.length;                      // новый id
+    setPoints([...points, { x: "", y: "", id: newId }]); // добавление точки
   };
 
+  /**
+  * Удаление точки по id
+  * @param id - идентификатор удаляемой точки
+  */
   const removePoint = (id) => {
-    if (points.length > 2) {
-      setPoints(points.filter(point => point.id !== id));
+    if (points.length > 4) {                              // проверка: должно остаться минимум 4 точки
+      setPoints(points.filter(point => point.id !== id)); 
     } else {
-      alert("Должно быть минимум 2 точки");
+      alert("Должно быть минимум 4 точки для формул дифференцирования");
     }
   };
 
+  /**
+  * Обновление значения x или y у точки
+  * @param id - идентификатор точки
+  * @param field - поле для обновления ("x" или "y")
+  * @param value - новое значение
+  */
   const updatePoint = (id, field, value) => {
     setPoints(points.map(point => 
       point.id === id ? { ...point, [field]: value } : point
     ));
   };
 
-
+  /**
+  * Вычисление производных по введённым точкам
+  * Проверяет корректность ввода, вызывает функции дифференцирования
+  */
   const calculateDerivatives = () => {
-    const xValues = [];
-    const yValues = [];
+    const xValues = [];                               // массив для x координат
+    const yValues = [];                               // массив для y координат
     
+    // сбор и валидация введённых данных
     for (let point of points) {
       if (point.x === "" || point.y === "") {
         alert("Заполните все значения x и y");
@@ -58,34 +78,58 @@ export default function derivatives() {
       yValues.push(y);
     }
     
-    setLoading(true);
+    // проверка на 4 точки (формулы работают только для 4 узлов)
+    if (xValues.length !== 4) {
+      alert("Для численного дифференцирования нужно ровно 4 точки");
+      return;
+    }
     
+    // проверка на равноотстоящие узлы (шаг h должен быть одинаковым)
+    const h = xValues[1] - xValues[0];                // вычисление шага
+    for (let i = 2; i < xValues.length; i++) {
+      if (Math.abs((xValues[i] - xValues[i-1]) - h) > 1e-10) {
+        alert("Узлы должны быть равноотстоящими (шаг h должен быть одинаковым)");
+        return;
+      }
+    }
+    
+    setLoading(true);                                 // включение индикатора загрузки
+    
+    // имитация асинхронного вычисления
     setTimeout(() => {
       try {
-        const first = differentiationFirst(xValues, yValues)
-        const second = differentiationSecond(xValues, yValues)
+        // вычисление первой и второй производных
+        const first = differentiationFirst(xValues, yValues);
+        const second = differentiationSecond(xValues, yValues);
         
-        setFirstResult(first);
-        setSecondResult(second);
+        setFirstResult(first);                        // сохранение результата первой производной
+        setSecondResult(second);                      // сохранение результата второй производной
+        setError(null);                               // сброс ошибки
       } catch (error) {
         alert("Ошибка при вычислении: " + error.message);
-        setError(null);
+        setError(error.message);                      // сохранение ошибки
+        setFirstResult(null);                         // сброс результата
+        setSecondResult(null);                        // сброс результата
       } finally {
-        setLoading(false);
+        setLoading(false);                            // выключение индикатора загрузки
       }
     }, 100);
   };
 
+  /**
+  * Очистка всех полей и результатов
+  * Сбрасывает точки к начальным 4 пустым строкам
+  */
   const clearAll = () => {
-    setPoints([
+    setPoints([                                        // сброс точек к начальному состоянию
       { x: "", y: "", id: 0 },
       { x: "", y: "", id: 1 },
-      { x: "", y: "", id: 2 }
+      { x: "", y: "", id: 2 },
+      { x: "", y: "", id: 3 }
     ]);
-    setXValue("");
-    setFirstResult(null);
-    setSecondResult(null);
-    setError(null);
+    setFirstResult(null);                             // сброс результата первой производной
+    setSecondResult(null);                            // сброс результата второй производной
+    setError(null);                                   // сброс ошибки
   };
 
   return (
@@ -207,7 +251,7 @@ export default function derivatives() {
               <View className="mb-6">
                 <View className="bg-[#1C1C1E] rounded-[32px] p-8 items-start mb-4">
                   <Text className="text-[#8E8E93] text-lg mb-2">
-                    Первая производная
+                    Вторая производная
                   </Text>
 
                   {secondResult.derivatives.map((val, idx) => (
