@@ -9,12 +9,12 @@
 * @returns число, резульат интегрирования
 */
 export const IntegrationSquare = (f, a, b, n) => {
-    let arr = []
+    let y = []
     let start = Math.min(a,b)
     let end = Math.max(a,b)
     let h = (end - start)/n
     for(let i = start; i < end; i+=h){
-        arr.push(f(i));
+        y.push(f(i));
     }
     let eps = 0;
     for(let i = 0; i < y.length; i++){
