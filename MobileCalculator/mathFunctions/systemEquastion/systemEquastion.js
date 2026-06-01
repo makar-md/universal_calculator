@@ -110,3 +110,27 @@ export const createSystemFromEquations = (equations) => {
   
   return { matrix, b };
 };
+
+export const parseEquation = (eq, n) => {
+  let equation = eq.replace(/\s/g, '');
+  let [left, right] = equation.split('=');
+  const b = parseFloat(right);
+  const coefficients = new Array(n).fill(0);
+  
+  const terms = left.match(/[+-]?[^+-]+/g);
+  
+  for (let term of terms) {
+    if (term === '') continue;
+    
+    if (term.includes('x')) {
+      const match = term.match(/([+-]?\d*\.?\d*)(x\d+)/);
+      if (match) {
+        let coeff = match[1] === '' || match[1] === '+' ? 1 : match[1] === '-' ? -1 : parseFloat(match[1]);
+        const varIndex = parseInt(match[2].substring(1)) - 1;
+        coefficients[varIndex] += coeff;
+      }
+    }
+  }
+  
+  return { coefficients, b };
+};
